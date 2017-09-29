@@ -56,7 +56,7 @@ namespace elem
 		int verts_num;
 		int nebrs_num;
 		std::array<int, MAX_ELEM_POINT_SIZE> verts;
-		std::array<Nebr, MAX_ELEM_POINT_SIZE> nebrs;
+		std::array<Nebr, MAX_ELEM_NEBR_SIZE> nebrs;
 		point::Point cent;
 		//double dist [MAX_ELEM_NEBR_SIZE];
 		//double square [MAX_ELEM_NEBR_SIZE];
