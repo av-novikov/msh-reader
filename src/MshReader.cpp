@@ -17,7 +17,7 @@ const grid::Mesh* MshReader::read(const string filename)
 
 	// Trash
 	do
-	msh >> buf;
+		msh >> buf;
 	while (buf != NODES_BEGIN);
 	// Number of nodes
 	msh >> mesh->pts_size;
@@ -36,40 +36,31 @@ const grid::Mesh* MshReader::read(const string filename)
 	msh >> buf;
 	while (buf != ELEMS_BEGIN);
 	// Elements
-	msh >> buf;
+	msh >> buf; msh >> buf;
 
 	while (buf != ELEMS_END)
 	{
-		auto readElem = [&, this](const elem::EType type, bool isInner)
+		auto readElem = [&, this](const elem::EType type)
 		{
-			msh >> buf;	msh >> buf;	msh >> buf;
 			for (int i = 0; i < elem::num_of_verts(type); i++)
-			{
 				msh >> vertInds[i];
-				vertInds[i]--;
-			}
+			for (int i = 0; i < elem::num_of_nebrs(type); i++)
+				msh >> nebrInds[i];
 
-			if (isInner)
-				mesh->elems.push_back(elem::Element(type, vertInds));
-			else
-				border_elems.push_back(elem::Element(type, vertInds));
+			mesh->elems.push_back(elem::Element(type, vertInds, nebrInds));
 		};
 
 		msh >> buf;
-		if (buf == TRI_TYPE)		readElem(elem::EType::BORDER_TRI, false);
-		else if (buf == QUAD_TYPE)	readElem(elem::EType::BORDER_QUAD, false);
-		else if (buf == HEX_TYPE)	readElem(elem::EType::HEX, true);
-		else if (buf == PRISM_TYPE)	readElem(elem::EType::PRISM, true);
-		else						getline(msh, buf);
-
+		if (buf == to_string(elem::BORDER_TRI))			readElem(elem::EType::BORDER_TRI);
+		else if (buf == to_string(elem::BORDER_QUAD))	readElem(elem::EType::BORDER_QUAD);
+		else if (buf == to_string(elem::FRAC_QUAD))		readElem(elem::EType::FRAC_QUAD);
+		else if (buf == to_string(elem::PRISM))			readElem(elem::EType::PRISM);
+		else if (buf == to_string(elem::HEX))			readElem(elem::EType::HEX);
+		else											getline(msh, buf);
 		msh >> buf;
 	}
 
 	msh.close();
-
-	mesh->inner_size = mesh->elems.size();
-	mesh->border_size = border_elems.size();
-	mesh->elems.insert(end(mesh->elems), begin(border_elems), end(border_elems));
 
 	for (int i = 0; i < mesh->elems.size(); i++)
 		mesh->elems[i].num = i;

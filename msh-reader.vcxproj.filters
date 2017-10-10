@@ -24,7 +24,7 @@
     <ClInclude Include="src\Point.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\kdtree.hpp">
+    <ClInclude Include="src\VTKSnapshotter.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -35,10 +35,10 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\kdtree.cpp">
+    <ClCompile Include="src\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Mesh.cpp">
+    <ClCompile Include="src\VTKSnapshotter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
