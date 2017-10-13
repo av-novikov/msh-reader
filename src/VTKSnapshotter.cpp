@@ -24,10 +24,22 @@ VTKSnapshotter::VTKSnapshotter()
 }
 VTKSnapshotter::~VTKSnapshotter()
 {
+	delete types;
 }
 void VTKSnapshotter::setGrid(Mesh* _mesh)
 {
 	mesh = _mesh;
+
+	// Write cell types
+	types = new int[mesh->elems.size()];
+	for (int i = 0; i < mesh->inner_size; i++)
+	{
+		const auto& el = mesh->elems[i];
+		if (el.type == elem::HEX)
+			types[i] = VTK_HEXAHEDRON;
+		else if (el.type == elem::PRISM)
+			types[i] = VTK_WEDGE;
+	}
 }
 string VTKSnapshotter::replace(string filename, string from, string to)
 {
@@ -67,24 +79,21 @@ void VTKSnapshotter::dump(const int i)
 			auto vtkCell = vtkSmartPointer<vtkHexahedron>::New();
 			for (int j = 0; j < el.verts_num; j++)
 				vtkCell->GetPointIds()->SetId(j, el.verts[j]);
-
 			cells->InsertNextCell(vtkCell);
-			type->InsertNextValue(el.type);
 		}
-		/*else if (el.type == elem::PRISM)
+		else if (el.type == elem::PRISM)
 		{
 			auto vtkCell = vtkSmartPointer<vtkWedge>::New();
 			for (int j = 0; j < el.verts_num; j++)
 				vtkCell->GetPointIds()->SetId(j, el.verts[j]);
-
 			cells->InsertNextCell(vtkCell);
 		}
 
-		type->InsertNextValue(el.type);*/
+		type->InsertNextValue(el.type);
 	}
 
 	grid->SetPoints(points);
-	grid->SetCells(VTK_HEXAHEDRON, cells);
+	grid->SetCells(types, cells);
 	vtkCellData* fd = grid->GetCellData();
 	fd->AddArray(type);
 

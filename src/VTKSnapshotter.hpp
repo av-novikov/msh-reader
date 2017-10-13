@@ -15,6 +15,8 @@ namespace snapshotter
 		std::string pattern;
 		std::string replace(std::string filename, std::string from, std::string to);
 		std::string getFileName(const int i);
+	private:
+		int *types;
 	public:
 		VTKSnapshotter();
 		~VTKSnapshotter();
