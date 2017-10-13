@@ -1,7 +1,7 @@
 #ifndef VTKSNAPSHOTTER_HPP_
 #define VTKSNAPSHOTTER_HPP_
 
-#include "Mesh.hpp"
+#include "src/mesh/Mesh.hpp"
 
 namespace snapshotter
 {

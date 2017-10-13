@@ -1,4 +1,4 @@
-#include "Mesh.hpp"
+#include "src/mesh/Mesh.hpp"
 #include <algorithm>
 
 using namespace grid;
@@ -24,16 +24,6 @@ void Mesh::count_types()
 		else if (el.type == elem::FRAC_QUAD)				frac_size++;
 		else												border_size++;
 	}
-}
-bool Mesh::are_adjanced(const elem::Element& el1, const elem::Element& el2)
-{
-	int sum = 0;
-
-	for (int i = 0; i < el1.verts_num; i++)
-		sum += (find(begin(el2.verts), end(el2.verts), el1.verts[i]) == end(el2.verts) ? 0 : 1);
-
-	if (sum > 2) return true;
-	else return false;
 }
 void Mesh::set_geom_props()
 {

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <memory>
 
-#include "src/MshReader.hpp"
+#include "src/mesh/MshReader.hpp"
 #include "src/VTKSnapshotter.hpp"
 
 using namespace std;

@@ -1,7 +1,7 @@
 #ifndef MESH_HPP_
 #define MESH_HPP_
 
-#include "Point.hpp"
+#include "src/Point.hpp"
 #include <vector>
 #include <cassert>
 #include <initializer_list>

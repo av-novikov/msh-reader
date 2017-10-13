@@ -1,4 +1,4 @@
-#include "VTKSnapshotter.hpp"
+#include "src/VTKSnapshotter.hpp"
 #include <string>
 
 #include <vtkVersion.h>

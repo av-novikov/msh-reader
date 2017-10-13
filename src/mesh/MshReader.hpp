@@ -5,7 +5,7 @@
 #include <fstream>
 #include <cstdlib>
 
-#include "Mesh.hpp"
+#include "src/mesh/Mesh.hpp"
 
 namespace mshreader
 {

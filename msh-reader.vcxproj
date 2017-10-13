@@ -89,7 +89,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\VTK\include\vtk-6.3;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\VTK\include\vtk-6.3;%(AdditionalIncludeDirectories);C:\proj\msh-reader</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -106,13 +106,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Program Files\VTK\include\vtk-7.1;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\VTK\include\vtk-7.1;%(AdditionalIncludeDirectories);C:\proj\msh-reader;C:\proj\adolc\adolc_sparse_x64\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vtkCommonCore-7.1.lib;vtkCommonDataModel-7.1.lib;vtkFiltersCore-7.1.lib;vtkIOCore-7.1.lib;vtkIOXML-7.1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files\VTK\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vtkCommonCore-7.1.lib;vtkCommonDataModel-7.1.lib;vtkFiltersCore-7.1.lib;vtkIOCore-7.1.lib;vtkIOXML-7.1.lib;adolc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files\VTK\lib;C:\proj\adolc\adolc_sparse_x64\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -125,7 +125,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\VTK\include\vtk-6.3;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\VTK\include\vtk-6.3;%(AdditionalIncludeDirectories);C:\proj\msh-reader</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -146,27 +146,31 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Program Files\VTK\include\vtk-7.1;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\VTK\include\vtk-7.1;%(AdditionalIncludeDirectories);C:\proj\msh-reader;C:\proj\adolc\adolc_sparse_x64\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>vtkCommonCore-7.1.lib;vtkCommonDataModel-7.1.lib;vtkFiltersCore-7.1.lib;vtkIOCore-7.1.lib;vtkIOXML-7.1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files\VTK\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vtkCommonCore-7.1.lib;vtkCommonDataModel-7.1.lib;vtkFiltersCore-7.1.lib;vtkIOCore-7.1.lib;vtkIOXML-7.1.lib;adolc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files\VTK\lib;C:\proj\adolc\adolc_sparse_x64\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\Mesh.hpp" />
-    <ClInclude Include="src\MshReader.hpp" />
+    <ClInclude Include="src\mesh\Mesh.hpp" />
+    <ClInclude Include="src\mesh\MshReader.hpp" />
+    <ClInclude Include="src\models\Variables.hpp" />
     <ClInclude Include="src\Point.hpp" />
+    <ClInclude Include="src\util\Interpolate.h" />
+    <ClInclude Include="src\util\utils.h" />
     <ClInclude Include="src\VTKSnapshotter.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="src\Mesh.cpp" />
-    <ClCompile Include="src\MshReader.cpp" />
+    <ClCompile Include="src\mesh\Mesh.cpp" />
+    <ClCompile Include="src\mesh\MshReader.cpp" />
+    <ClCompile Include="src\util\Interpolate.cpp" />
     <ClCompile Include="src\VTKSnapshotter.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
