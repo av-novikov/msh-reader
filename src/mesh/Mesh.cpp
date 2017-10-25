@@ -18,8 +18,10 @@ void Mesh::process_geometry()
 void Mesh::count_types()
 {
 	inner_size = border_size = frac_size = 0;
-	for (const auto& el : elems)
+	Volume = 0.0;
+	for (const auto& el : cells)
 	{
+		Volume += el.V;
 		if (el.type == elem::HEX || el.type == elem::PRISM)	inner_size++;
 		else if (el.type == elem::FRAC_QUAD)				frac_size++;
 		else												border_size++;
@@ -27,7 +29,7 @@ void Mesh::count_types()
 }
 void Mesh::set_geom_props()
 {
-	for (auto& el : elems)
+	for (auto& el : cells)
 	{
 		// element center
 		el.cent = { 0.0, 0.0, 0.0 };
@@ -110,13 +112,13 @@ void Mesh::set_geom_props()
 int Mesh::check_neighbors() const
 {
 	int sum;
-	for (const auto& el : elems)
+	for (const auto& el : cells)
 		for (int i = 0; i < el.nebrs_num; i++)
 		{
 			sum = 0;
-			const auto& el_nebr = elems[el.nebrs[i].id];
+			const auto& el_nebr = cells[el.nebrs[i].id];
 			for (int j = 0; j < el_nebr.nebrs_num; j++)
-				if (el_nebr.nebrs[j].id == el.num)
+				if (el_nebr.nebrs[j].id == el.id)
 					if (el_nebr.nebrs[j].cent == el.nebrs[i].cent)
 						break;
 					else
@@ -125,4 +127,8 @@ int Mesh::check_neighbors() const
 						exit(-1);
 					}
 		}
+}
+size_t Mesh::getCellsSize() const
+{
+	return cells.size();
 }

@@ -1,7 +1,7 @@
 #ifndef MESH_HPP_
 #define MESH_HPP_
 
-#include "src/Point.hpp"
+#include "src/util/Point.hpp"
 #include <vector>
 #include <cassert>
 #include <initializer_list>
@@ -49,7 +49,7 @@ namespace elem
 	class Element
 	{
 	public:
-		int num;
+		int id;
 		EType type;
 
 		int verts_num;
@@ -81,7 +81,7 @@ namespace mshreader
 };
 namespace snapshotter
 {
-	class VTKSnapshotter;
+	template<class modelType> class VTKSnapshotter;
 };
 
 namespace grid
@@ -89,23 +89,31 @@ namespace grid
 	class Mesh
 	{
 		friend class mshreader::MshReader;
-		friend class snapshotter::VTKSnapshotter;
+		template<typename> friend class snapshotter::VTKSnapshotter;
+		template<typename> friend class AbstractSolver;
+	public:
+		typedef elem::Element Cell;
 	protected:
 		int inner_size, border_size, frac_size, pts_size;
 		std::vector<point::Point> pts;
-		std::vector<elem::Element> elems;
+		std::vector<Cell> cells;
 
 		int check_neighbors() const;
-		bool are_adjanced(const elem::Element& el1, const elem::Element& el2);
+		bool are_adjanced(const Cell& el1, const Cell& el2);
 		void set_geom_props();
 		void count_types();
 
-		struct kdtree* kdtree;
 	public:
+		double Volume;
+
 		Mesh();
 		~Mesh();
 
 		void process_geometry();
+
+		size_t getCellsSize() const;
+		inline Cell& getCell(const int i) {	return cells[i]; };
+		inline const Cell& getCell(const int i) const { return cells[i]; };
 	};
 }
 

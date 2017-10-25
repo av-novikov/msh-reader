@@ -5,12 +5,15 @@
 
 namespace snapshotter
 {
+	template<class modelType> 
 	class VTKSnapshotter
 	{
 	public:
-		typedef grid::Mesh Mesh;
+		typedef modelType Model;
+		typedef typename Model::Mesh Mesh;
+		typedef typename Model::Cell Cell;
 	protected:
-		Mesh* mesh;
+		const Model* model;
 		const std::string prefix = "snaps/";
 		std::string pattern;
 		std::string replace(std::string filename, std::string from, std::string to);
@@ -18,10 +21,8 @@ namespace snapshotter
 	private:
 		int *types;
 	public:
-		VTKSnapshotter();
+		VTKSnapshotter(const Model* _model);
 		~VTKSnapshotter();
-
-		void setGrid(Mesh* _mesh);
 
 		void dump(const int i);
 	};

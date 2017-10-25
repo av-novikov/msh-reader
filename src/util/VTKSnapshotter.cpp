@@ -1,4 +1,4 @@
-#include "src/VTKSnapshotter.hpp"
+#include "src/util/VTKSnapshotter.hpp"
 #include <string>
 
 #include <vtkVersion.h>
@@ -18,30 +18,32 @@
 using namespace std;
 using namespace snapshotter;
 
-VTKSnapshotter::VTKSnapshotter()
+template<class modelType>
+VTKSnapshotter<modelType>::VTKSnapshotter(const Model* _model) : model(_model)
 {
 	pattern = prefix + "Mesh_%{STEP}.vtu";
-}
-VTKSnapshotter::~VTKSnapshotter()
-{
-	delete types;
-}
-void VTKSnapshotter::setGrid(Mesh* _mesh)
-{
-	mesh = _mesh;
+
+	model = _model;
+	const auto mesh = model->getMesh();
 
 	// Write cell types
-	types = new int[mesh->elems.size()];
+	types = new int[mesh->cells.size()];
 	for (int i = 0; i < mesh->inner_size; i++)
 	{
-		const auto& el = mesh->elems[i];
+		const auto& el = mesh->cells[i];
 		if (el.type == elem::HEX)
 			types[i] = VTK_HEXAHEDRON;
 		else if (el.type == elem::PRISM)
 			types[i] = VTK_WEDGE;
 	}
 }
-string VTKSnapshotter::replace(string filename, string from, string to)
+template<class modelType>
+VTKSnapshotter<modelType>::~VTKSnapshotter()
+{
+	delete types;
+}
+template<class modelType>
+string VTKSnapshotter<modelType>::replace(string filename, string from, string to)
 {
 	size_t start_pos = 0;
 	while ((start_pos = filename.find(from, start_pos)) != string::npos)
@@ -51,13 +53,15 @@ string VTKSnapshotter::replace(string filename, string from, string to)
 	}
 	return filename;
 }
-std::string VTKSnapshotter::getFileName(const int i)
+template<class modelType>
+std::string VTKSnapshotter<modelType>::getFileName(const int i)
 {
 	string filename = pattern;
 	return replace(filename, "%{STEP}", to_string(i));
 }
 
-void VTKSnapshotter::dump(const int i)
+template<class modelType>
+void VTKSnapshotter<modelType>::dump(const int i)
 {
 	auto grid = vtkSmartPointer<vtkUnstructuredGrid>::New();
 	auto points = vtkSmartPointer<vtkPoints>::New();
@@ -66,14 +70,14 @@ void VTKSnapshotter::dump(const int i)
 	type->SetName("type");
 
 	points->Allocate(mesh->pts.size());
-	cells->Allocate(mesh->elems.size());
+	cells->Allocate(mesh->cells.size());
 
 	for (const auto& pt : mesh->pts)
 		points->InsertNextPoint(pt.x, pt.y, pt.z);
 
 	for (int i = 0; i < mesh->inner_size; i++)
 	{
-		const auto& el = mesh->elems[i];
+		const auto& el = mesh->cells[i];
 		if (el.type == elem::HEX)
 		{
 			auto vtkCell = vtkSmartPointer<vtkHexahedron>::New();

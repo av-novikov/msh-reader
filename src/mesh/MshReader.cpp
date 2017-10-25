@@ -47,7 +47,7 @@ const grid::Mesh* MshReader::read(const string filename)
 			for (int i = 0; i < elem::num_of_nebrs(type); i++)
 				msh >> nebrInds[i];
 
-			mesh->elems.push_back(elem::Element(type, vertInds, nebrInds));
+			mesh->cells.push_back(elem::Element(type, vertInds, nebrInds));
 		};
 
 		msh >> buf;
@@ -62,8 +62,8 @@ const grid::Mesh* MshReader::read(const string filename)
 
 	msh.close();
 
-	for (int i = 0; i < mesh->elems.size(); i++)
-		mesh->elems[i].num = i;
+	for (int i = 0; i < mesh->cells.size(); i++)
+		mesh->cells[i].num = i;
 
 	return mesh;
 }
