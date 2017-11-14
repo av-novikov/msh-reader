@@ -16,7 +16,7 @@
 template <typename TVarContainer, typename propsType, template <typename TVarContainer> class TVariables, class modelType>
 class AbstractModel : public TVariables<TVarContainer>
 {	
-	template<typename> friend class VTKSnapshotter;
+	template<typename> friend class snapshotter::VTKSnapshotter;
 	template<typename> friend class AbstractSolver;
 public:
 	typedef TVarContainer VarContainer;
@@ -71,7 +71,7 @@ protected:
 	virtual void loadMesh(const std::string nebrFileName)
 	{
 		mshreader::MshReader reader;
-		mesh = std::make_shared<grid::Mesh>(*reader.read(nebrFileName));
+		mesh = std::make_shared<grid::Mesh>(*reader.read(nebrFileName, R_dim));
 
 		cellsNum = mesh.get()->getCellsSize();
 		varNum = VarContainer::size * cellsNum;

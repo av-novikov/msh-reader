@@ -137,42 +137,56 @@ double Oil::getRate(const size_t cell_idx)
 	return 0.0;
 }
 
+void Oil::setTrans()
+{
+	/*for (int i = 0; i < mesh->inner_size; i++)
+	{
+		const auto& cell = mesh->cells[i];
+
+		for(int j = 0; j < cell.nebrs_num; j++)
+			if (cell.type == elem::HEX)
+			{
+
+			}
+	}*/
+}
+
 adouble Oil::solveInner(const Cell& cell)
 {
-/*	const auto& cur = x[cell.id];
+	const auto& cur = x[cell.id];
 	const auto prev = (*this)[cell.id].u_prev;
 
 	adouble H = props_sk[0].getPoro(cur.p) * props_oil.getDensity(cur.p) - props_sk[0].getPoro(prev.p) * props_oil.getDensity(prev.p);
 	for (int i = 0; i < 3; i++)
 	{
-		const int nebr_idx = cell.nebr[i];
+		/*const int nebr_idx = cell.nebr[i];
 		const auto& beta = mesh->cells[nebr_idx];
 		const auto& nebr = x[nebr_idx];
 
 		H += ht / cell.V * getTrans(cell, i, beta) *
 			linearAppr(props_oil.getDensity(cur.p) / props_oil.getViscosity(cur.p), cell.dist[i],
 				props_oil.getDensity(nebr.p) / props_oil.getViscosity(nebr.p), getDistance(beta, cell)) *
-				(cur.p - nebr.p);
+				(cur.p - nebr.p);*/
 	}
-	return H;*/
+	return H;
 }
 adouble Oil::solveBorder(const Cell& cell)
 {
-/*	const auto& cur = x[cell.id];
-	const auto& nebr = x[cell.nebr[0]];
+	const auto& cur = x[cell.id];
+	const auto& nebr = x[cell.nebrs[0].nebr.cell];
 	adouble H;
 	adouble rightIsPres = rightBoundIsPres;
 	condassign(H, rightIsPres, (cur.p - (adouble)(props_sk[0].p_out)) / P_dim, (cur.p - nebr.p) / P_dim);
 
-	return H;*/
+	return H;
 }
-adouble Oil::solveWell(const Cell& cell)
+adouble Oil::solveFrac(const Cell& cell)
 {
-/*	const auto& cur = x[cell.id];
+	const auto& cur = x[cell.id];
 	const auto prev = (*this)[cell.id].u_prev;
 
 	adouble H = props_sk[0].getPoro(cur.p) * props_oil.getDensity(cur.p) - props_sk[0].getPoro(prev.p) * props_oil.getDensity(prev.p);
-	for (int i = 0; i < mesh->wellNebrs.size(); i++)
+	/*for (int i = 0; i < mesh->wellNebrs.size(); i++)
 	{
 		const auto& nebr_str = mesh->wellNebrs[i];
 		const int nebr_idx = nebr_str.id;
@@ -183,7 +197,7 @@ adouble Oil::solveWell(const Cell& cell)
 			linearAppr(props_oil.getDensity(cur.p) / props_oil.getViscosity(cur.p), nebr_str.dist,
 				props_oil.getDensity(nebr.p) / props_oil.getViscosity(nebr.p), getDistance(beta, cell)) *
 				(cur.p - nebr.p);
-	}
+	}*/
 
-	return H;*/
+	return H;
 }

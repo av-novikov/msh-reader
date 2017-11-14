@@ -101,6 +101,12 @@ namespace point
 	{
 		return a1.x * a2.x + a1.y * a2.y + a1.z * a2.z;
 	};
+	inline Point vector_product(const Point& a1, const Point& a2)
+	{
+		return{ a1.y * a2.z - a1.z * a2.y,
+				a1.z * a2.x - a1.x * a2.z,
+				a1.x * a2.y - a1.y * a2.x };
+	};
 	inline double distance(const Point& a1, const Point& a2)
 	{
 		return sqrt(dot_product(a2 - a1, a2 - a1));

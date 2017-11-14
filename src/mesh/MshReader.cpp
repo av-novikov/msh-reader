@@ -9,7 +9,7 @@ MshReader::MshReader()
 MshReader::~MshReader()
 {
 }
-const grid::Mesh* MshReader::read(const string filename)
+const grid::Mesh* MshReader::read(const string filename, const double x_dim)
 {
 	mesh = new grid::Mesh;
 	ifstream msh;
@@ -26,7 +26,9 @@ const grid::Mesh* MshReader::read(const string filename)
 	while (buf != NODES_END)
 	{
 		msh >> x; msh >> y;	msh >> z;
-		mesh->pts.push_back(point::Point(stod(x, &sz), stod(y, &sz), stod(z, &sz)));
+		mesh->pts.push_back(point::Point(stod(x, &sz) / x_dim, 
+										stod(y, &sz) / x_dim, 
+										stod(z, &sz) / x_dim));
 		msh >> buf;
 	}
 	assert(mesh->pts.size() == mesh->pts_size);
@@ -63,7 +65,7 @@ const grid::Mesh* MshReader::read(const string filename)
 	msh.close();
 
 	for (int i = 0; i < mesh->cells.size(); i++)
-		mesh->cells[i].num = i;
+		mesh->cells[i].id = i;
 
 	return mesh;
 }

@@ -16,10 +16,10 @@ OilSolver::OilSolver(Model* _model) : AbstractSolver<Model>(_model)
 	y = new double[var_size * size];
 
 	const int strNum = var_size * model->cellsNum;
-	ind_i = new int[mesh::stencil * var_size * strNum];
-	ind_j = new int[mesh::stencil * var_size * strNum];
+	ind_i = new int[grid::stencil * var_size * strNum];
+	ind_j = new int[grid::stencil * var_size * strNum];
 	cols = new int[strNum];
-	a = new double[mesh::stencil * var_size * strNum];
+	a = new double[grid::stencil * var_size * strNum];
 	ind_rhs = new int[strNum];
 	rhs = new double[strNum];
 
@@ -151,7 +151,7 @@ void OilSolver::copySolution(const paralution::LocalVector<double>& sol)
 
 void OilSolver::computeJac()
 {
-	trace_on(0);
+	/*trace_on(0);
 
 	for (size_t i = 0; i < size; i++)
 		model->x[i].p <<= model->u_next[i * var_size];
@@ -180,7 +180,7 @@ void OilSolver::computeJac()
 	for (int i = 0; i < Model::var_size * size; i++)
 		model->h[i] >>= y[i];
 
-	trace_off();
+	trace_off();*/
 }
 void OilSolver::fill()
 {

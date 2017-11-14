@@ -21,6 +21,7 @@ oil::Properties* getProps()
 	props->ht_max = 100000.0;
 
 	props->perfIntervals.push_back(make_pair(0, 0));
+	props->R_dim = 10.0;
 	props->r_w = 10;
 	props->r_e = 1000.0;
 

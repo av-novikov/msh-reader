@@ -28,7 +28,7 @@ namespace mshreader
 		MshReader();
 		~MshReader();
 
-		const grid::Mesh* read(const std::string filename);
+		const grid::Mesh* read(const std::string filename, const double x_dim);
 	};
 };
 

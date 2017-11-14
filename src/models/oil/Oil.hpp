@@ -10,9 +10,10 @@ namespace oil
 	typedef var::containers::TapeVar1Phase TapeVariable;
 	class Oil : public AbstractModel<var::containers::Var1phase, Properties, var::BasicVariables, Oil>
 	{
-		template<typename> friend class VTKSnapshotter;
+		template<typename> friend class snapshotter::VTKSnapshotter;
 		friend class OilSolver;
 	protected:
+		void setTrans();
 		void setProps(const Properties& props);
 		void makeDimLess();
 		void setInitialState();
@@ -56,7 +57,7 @@ namespace oil
 
 		adouble solveInner(const Cell& cell);
 		adouble solveBorder(const Cell& cell);
-		adouble solveWell(const Cell& cell);
+		adouble solveFrac(const Cell& cell);
 	public:
 		Oil();
 		~Oil();

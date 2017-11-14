@@ -14,10 +14,13 @@ namespace snapshotter
 		typedef typename Model::Cell Cell;
 	protected:
 		const Model* model;
+		const Mesh* mesh;
 		const std::string prefix = "snaps/";
 		std::string pattern;
 		std::string replace(std::string filename, std::string from, std::string to);
 		std::string getFileName(const int i);
+
+		double R_dim;
 	private:
 		int *types;
 	public:

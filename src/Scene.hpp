@@ -25,6 +25,7 @@ public:
 		model = std::make_shared<Model>();
 		model->load(props, nebrFileName);
 		model->setSnapshotter(model.get());
+		model->snapshot_all(0);
 
 		paralution::init_paralution();
 

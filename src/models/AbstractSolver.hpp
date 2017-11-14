@@ -55,7 +55,7 @@ protected:
 	std::vector<int> stencil_idx;
 	inline void getMatrixStencil(const Cell& cell)
 	{
-		if (cell.type == elem::BORDER_TRI || cell.type == elem::BORDER_QUAD)
+		/*if (cell.type == elem::BORDER_TRI || cell.type == elem::BORDER_QUAD)
 		{
 			stencil_idx.resize(2);
 			stencil_idx[0] = cell.id;
@@ -88,7 +88,7 @@ protected:
 			stencil_idx[4] = cell.nebrs[3].id;
 			stencil_idx[5] = cell.nebrs[4].id;
 			stencil_idx[6] = cell.nebrs[5].id;
-		}
+		}*/
 	};
 
 	int* ind_i;

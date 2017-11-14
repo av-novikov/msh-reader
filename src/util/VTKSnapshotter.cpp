@@ -1,4 +1,3 @@
-#include "src/util/VTKSnapshotter.hpp"
 #include <string>
 
 #include <vtkVersion.h>
@@ -15,16 +14,18 @@
 #include <vtkXMLUnstructuredGridWriter.h>
 #include <vtkHexahedron.h>
 
+#include "src/util/VTKSnapshotter.hpp"
+
+#include "src/models/oil/Oil.hpp"
+
 using namespace std;
 using namespace snapshotter;
 
 template<class modelType>
-VTKSnapshotter<modelType>::VTKSnapshotter(const Model* _model) : model(_model)
+VTKSnapshotter<modelType>::VTKSnapshotter(const Model* _model) : model(_model), mesh(_model->getMesh())
 {
+	R_dim = model->R_dim;
 	pattern = prefix + "Mesh_%{STEP}.vtu";
-
-	model = _model;
-	const auto mesh = model->getMesh();
 
 	// Write cell types
 	types = new int[mesh->cells.size()];
@@ -73,7 +74,7 @@ void VTKSnapshotter<modelType>::dump(const int i)
 	cells->Allocate(mesh->cells.size());
 
 	for (const auto& pt : mesh->pts)
-		points->InsertNextPoint(pt.x, pt.y, pt.z);
+		points->InsertNextPoint(pt.x * R_dim, pt.y * R_dim, pt.z * R_dim);
 
 	for (int i = 0; i < mesh->inner_size; i++)
 	{
@@ -107,3 +108,5 @@ void VTKSnapshotter<modelType>::dump(const int i)
 	writer->SetInputData(grid);
 	writer->Write();
 }
+
+template class VTKSnapshotter<oil::Oil>;
