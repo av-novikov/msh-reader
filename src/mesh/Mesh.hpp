@@ -15,30 +15,30 @@ namespace elem
 	static const int TRI_VERT_SIZE = 3;
 	static const int MAX_INTERFACES_STENCIL = 6;
 
-	enum EType { BORDER_TRI, BORDER_QUAD, FRAC_QUAD, PRISM, HEX, BORDER_HOR};
-	struct Id { int cell; char nebr; };
+	enum EType { BORDER_TRI, BORDER_QUAD, FRAC_QUAD, PRISM, HEX, BORDER_HEX};
 	inline const char num_of_verts(const EType type)
 	{
-		if (type == EType::BORDER_TRI)
+		if (type == BORDER_TRI)
 			return 3;
-		else if (type == EType::BORDER_QUAD || type == EType::FRAC_QUAD)
+		else if (type == BORDER_QUAD || type == FRAC_QUAD)
 			return 4;
-		else if (type == EType::PRISM)
+		else if (type == PRISM)
 			return 6;
-		else if (type == EType::HEX)
+		else if (type == HEX || type == BORDER_HEX)
 			return 8;
 	}
 	inline const char num_of_nebrs(const EType type)
 	{
-		if (type == EType::BORDER_TRI || type == EType::BORDER_QUAD)
+		if (type == BORDER_TRI || type == BORDER_QUAD)
 			return 1;
-		else if (type == EType::FRAC_QUAD)
+		else if (type == FRAC_QUAD)
 			return 2;
-		else if (type == EType::PRISM)
+		else if (type == PRISM)
 			return 5;
-		else if (type == EType::HEX)
+		else if (type == HEX || type == BORDER_HEX)
 			return 6;
 	}
+	struct Id { int cell; char nebr; };
 	struct Nebr
 	{
 		Id nebr;
@@ -105,12 +105,10 @@ namespace grid
 		std::vector<point::Point> pts;
 		std::vector<Cell> cells;
 	protected:
-		int check_neighbors() const;
-		bool are_adjanced(const Cell& el1, const Cell& el2);
 		void set_geom_props();
 		void count_types();
 		void setNebrId();
-		void set_vertical_bounds();
+		double getBorderWidth() const;
 		inline const char findNebrId(const Cell& cell_cur, const Cell& cell_nebr)
 		{
 			for (char i = 0; i < cell_nebr.nebrs_num; i++)

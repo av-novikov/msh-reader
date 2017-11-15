@@ -48,7 +48,7 @@ int main()
 {
 	const auto props = getProps();
 	Scene<oil::Oil, oil::OilSolver, oil::Properties> scene;
-	scene.load(*props, "attempt2.nebr");
+	scene.load(*props, "attempt3.nebr");
 
 	return 0;
 }

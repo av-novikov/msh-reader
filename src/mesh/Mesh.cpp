@@ -1,5 +1,6 @@
 #include "src/mesh/Mesh.hpp"
 #include <algorithm>
+#include <unordered_set>
 
 using namespace grid;
 using namespace point;
@@ -15,7 +16,6 @@ void Mesh::process_geometry()
 {
 	setNebrId();
 	set_geom_props();
-	set_vertical_bounds();
 	count_types();
 }
 void Mesh::count_types()
@@ -160,25 +160,6 @@ void Mesh::set_geom_props()
 		}
 	}
 };
-int Mesh::check_neighbors() const
-{
-	int sum;
-	for (const auto& el : cells)
-		for (int i = 0; i < el.nebrs_num; i++)
-		{
-			sum = 0;
-			const auto& el_nebr = cells[el.nebrs[i].nebr.cell];
-			for (int j = 0; j < el_nebr.nebrs_num; j++)
-				if (el_nebr.nebrs[j].nebr.cell == el.id)
-					if (el_nebr.nebrs[j].cent == el.nebrs[i].cent)
-						break;
-					else
-					{
-						return i;
-						exit(-1);
-					}
-		}
-}
 size_t Mesh::getCellsSize() const
 {
 	return cells.size();
@@ -189,15 +170,15 @@ void Mesh::setNebrId()
 		for (char i = 0; i < el.nebrs_num; i++)
 			el.nebrs[i].nebr.nebr = findNebrId(el, cells[el.nebrs[i].nebr.cell]);
 }
-void Mesh::set_vertical_bounds()
+double Mesh::getBorderWidth() const
 {
-	for (int i = inner_size; i < inner_size + border_size; i++)
-	{
-		auto& cell = cells[i];
-		if (cell.type == elem::BORDER_QUAD && fabs(cell.nebrs[0].n.z) < EQUALITY_TOLERANCE)
+	double s = 0.0;
+	int counter = 0;
+	for (const auto& el : cells)
+		if (el.type == elem::BORDER_QUAD && fabs(el.nebrs[0].n.z) < EQUALITY_TOLERANCE)
 		{
-			cell.type = elem::BORDER_HOR;
-
+			s += cells[el.nebrs[0].nebr.cell].V / el.nebrs[0].S;
+			counter++;
 		}
-	}
+	return s / (double)(counter);
 }

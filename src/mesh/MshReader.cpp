@@ -53,11 +53,12 @@ const grid::Mesh* MshReader::read(const string filename, const double x_dim)
 		};
 
 		msh >> buf;
-		if (buf == to_string(elem::BORDER_TRI))			readElem(elem::EType::BORDER_TRI);
-		else if (buf == to_string(elem::BORDER_QUAD))	readElem(elem::EType::BORDER_QUAD);
-		else if (buf == to_string(elem::FRAC_QUAD))		readElem(elem::EType::FRAC_QUAD);
-		else if (buf == to_string(elem::PRISM))			readElem(elem::EType::PRISM);
-		else if (buf == to_string(elem::HEX))			readElem(elem::EType::HEX);
+		if (buf == to_string(elem::BORDER_TRI))			readElem(elem::BORDER_TRI);
+		else if (buf == to_string(elem::BORDER_QUAD))	readElem(elem::BORDER_QUAD);
+		else if (buf == to_string(elem::FRAC_QUAD))		readElem(elem::FRAC_QUAD);
+		else if (buf == to_string(elem::PRISM))			readElem(elem::PRISM);
+		else if (buf == to_string(elem::HEX))			readElem(elem::HEX);
+		else if (buf == to_string(elem::BORDER_HEX))	readElem(elem::BORDER_HEX);
 		else											getline(msh, buf);
 		msh >> buf;
 	}

@@ -72,11 +72,14 @@ protected:
 	{
 		mshreader::MshReader reader;
 		mesh = std::make_shared<grid::Mesh>(*reader.read(nebrFileName, R_dim));
+		mesh->process_geometry();
 
 		cellsNum = mesh.get()->getCellsSize();
 		varNum = VarContainer::size * cellsNum;
+		u_prev.resize(varNum);
+		u_iter.resize(varNum);
+		u_next.resize(varNum);
 
-		mesh->process_geometry();
 		Volume = mesh->Volume;
 	}
 	virtual void setProps(const propsType& props) = 0;

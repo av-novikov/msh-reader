@@ -45,6 +45,8 @@ namespace point
 		{
 			x -= rhs.x;	y -= rhs.y;	z -= rhs.z;
 		};
+
+		inline double norm() const { return sqrt(x * x + y * y + z * z); };
 	};
 	inline std::ostream& operator<<(std::ostream& os, const Point& a)
 	{
