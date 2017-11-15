@@ -25,7 +25,9 @@ void Mesh::count_types()
 	for (const auto& el : cells)
 	{
 		Volume += el.V;
-		if (el.type == elem::HEX || el.type == elem::PRISM)	inner_size++;
+		if (el.type == elem::HEX || 
+			el.type == elem::BORDER_HEX || 
+			el.type == elem::PRISM)							inner_size++;
 		else if (el.type == elem::FRAC_QUAD)				frac_size++;
 		else												border_size++;
 	}
@@ -37,27 +39,8 @@ void Mesh::set_geom_props()
 
 	for (auto& el : cells)
 	{
-		if (el.type == elem::EType::HEX)
+		if (el.type == elem::HEX || el.type == elem::BORDER_HEX)
 		{
-			/*for (char i = 2; i < el.nebrs_num; i++)
-			{
-				Cell& cur_cell = el;
-				Cell& nebr_cell = cells[el.nebrs[i].nebr.cell];
-				cur_id = el.nebrs[i].nebr.nebr;
-				next_id = (cur_id + 1 != nebr_cell.nebrs_num) ? cur_id + 1 : 2;
-				prev_id = (cur_id != 2) ? cur_id - 1 : nebr_cell.nebrs_num;
-
-				counter = 0;
-				while (cur_cell.id != el.id)
-				{
-					cur_cell = nebr_cell;
-					nebr_cell = cells[cur_cell.nebrs[next_id].nebr.cell];
-
-					el.nebrs[i].stencilL[counter].cell = cur_cell.id;		el.nebrs[i].stencilL[counter].nebr = next_id;
-
-				}
-			}*/
-
 			// element center
 			tmp1 = square(pts[el.verts[0]], pts[el.verts[1]], pts[el.verts[2]]);
 			tmp2 = square(pts[el.verts[2]], pts[el.verts[3]], pts[el.verts[0]]);
@@ -100,7 +83,7 @@ void Mesh::set_geom_props()
 
 			el.V = fabs(pts[el.verts[0]].z - pts[el.verts[4]].z) * (el.nebrs[0].S + el.nebrs[1].S) / 2.0;
 		}
-		else if (el.type == elem::EType::PRISM)
+		else if (el.type == elem::PRISM)
 		{
 			el.cent = { 0, 0, 0 };
 			for (int i = 0; i < el.verts_num; i++)
@@ -136,13 +119,13 @@ void Mesh::set_geom_props()
 
 			el.V = fabs(pts[el.verts[0]].z - pts[el.verts[3]].z) * (el.nebrs[0].S + el.nebrs[1].S) / 2.0;
 		}
-		else if (el.type == elem::EType::BORDER_TRI)
+		else if (el.type == elem::BORDER_TRI)
 		{
 			el.nebrs[0].S = square(pts[el.verts[0]], pts[el.verts[1]], pts[el.verts[2]]);
 			el.cent = el.nebrs[0].cent = (pts[el.verts[0]] + pts[el.verts[1]] + pts[el.verts[2]]) / 3.0;
 			el.nebrs[0].L = el.V = 0.0;
 		}
-		else if (el.type == elem::EType::BORDER_QUAD)
+		else if (el.type == elem::BORDER_QUAD)
 		{
 			el.nebrs[0].S = square(pts[el.verts[0]], pts[el.verts[1]], pts[el.verts[2]], pts[el.verts[3]]);
 			tmp1 = square(pts[el.verts[0]], pts[el.verts[1]], pts[el.verts[2]]);
@@ -151,7 +134,7 @@ void Mesh::set_geom_props()
 			el.nebrs[0].L = el.V = 0.0;
 			el.nebrs[0].n = vector_product(pts[el.verts[1]] - pts[el.verts[0]], pts[el.verts[3]] - pts[el.verts[0]]);
 		}
-		else if (el.type == elem::EType::FRAC_QUAD)
+		else if (el.type == elem::FRAC_QUAD)
 		{
 			el.nebrs[0].S = el.nebrs[1].S = square(pts[el.verts[0]], pts[el.verts[1]], pts[el.verts[2]], pts[el.verts[3]]);
 			el.cent = el.nebrs[0].cent = el.nebrs[1].cent = (pts[el.verts[0]] + pts[el.verts[1]] + pts[el.verts[2]] + pts[el.verts[3]]) / 4.0;
@@ -169,16 +152,4 @@ void Mesh::setNebrId()
 	for (auto& el : cells)
 		for (char i = 0; i < el.nebrs_num; i++)
 			el.nebrs[i].nebr.nebr = findNebrId(el, cells[el.nebrs[i].nebr.cell]);
-}
-double Mesh::getBorderWidth() const
-{
-	double s = 0.0;
-	int counter = 0;
-	for (const auto& el : cells)
-		if (el.type == elem::BORDER_QUAD && fabs(el.nebrs[0].n.z) < EQUALITY_TOLERANCE)
-		{
-			s += cells[el.nebrs[0].nebr.cell].V / el.nebrs[0].S;
-			counter++;
-		}
-	return s / (double)(counter);
 }

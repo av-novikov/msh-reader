@@ -108,7 +108,6 @@ namespace grid
 		void set_geom_props();
 		void count_types();
 		void setNebrId();
-		double getBorderWidth() const;
 		inline const char findNebrId(const Cell& cell_cur, const Cell& cell_nebr)
 		{
 			for (char i = 0; i < cell_nebr.nebrs_num; i++)
