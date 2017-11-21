@@ -53,7 +53,7 @@ namespace elem
 	class Element
 	{
 	public:
-		int id;
+		const int id;
 		EType type;
 
 		char verts_num;
@@ -63,13 +63,13 @@ namespace elem
 		point::Point cent;
 		double V;
 
-		Element() {};
-		Element(const EType _type, const int* _verts) : type(_type), verts_num(num_of_verts(_type)), nebrs_num(num_of_nebrs(_type))
+		Element() : id(-1) {};
+		Element(const int _id, const EType _type, const int* _verts) : id(_id), type(_type), verts_num(num_of_verts(_type)), nebrs_num(num_of_nebrs(_type))
 		{
 			for (int i = 0; i < verts_num; i++)
 				verts[i] = _verts[i];
 		};
-		Element(const EType _type, const int* _verts, const int* _nebrs) : type(_type), verts_num(num_of_verts(_type)), nebrs_num(num_of_nebrs(_type))
+		Element(const int _id, const EType _type, const int* _verts, const int* _nebrs) : id(_id), type(_type), verts_num(num_of_verts(_type)), nebrs_num(num_of_nebrs(_type))
 		{
 			for (int i = 0; i < verts_num; i++)
 				verts[i] = _verts[i];
@@ -115,6 +115,7 @@ namespace grid
 					return i;
 			exit(-1);
 		};
+		void set_interaction_regions();
 
 	public:
 		double Volume;

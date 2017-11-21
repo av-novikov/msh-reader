@@ -23,12 +23,20 @@ const grid::Mesh* MshReader::read(const string filename, const double x_dim)
 	msh >> mesh->pts_size;
 	// Nodes
 	msh >> buf;
+	int counter = 0;
+	vector<int> cells;
 	while (buf != NODES_END)
 	{
 		msh >> x; msh >> y;	msh >> z;
-		mesh->pts.push_back(point::Point(stod(x, &sz) / x_dim, 
-										stod(y, &sz) / x_dim, 
-										stod(z, &sz) / x_dim));
+		msh >> buf;
+		cells.clear();
+		cells.resize(stoi(buf, &sz));
+		for (auto& cell_idx : cells)
+		{
+			msh >> buf;
+			cell_idx = stoi(buf, &sz);
+		}
+		mesh->pts.push_back(point::Point(counter++, stod(x, &sz) / x_dim, stod(y, &sz) / x_dim, stod(z, &sz) / x_dim, cells));
 		msh >> buf;
 	}
 	assert(mesh->pts.size() == mesh->pts_size);
@@ -40,6 +48,7 @@ const grid::Mesh* MshReader::read(const string filename, const double x_dim)
 	// Elements
 	msh >> buf; msh >> buf;
 
+	counter = 0;
 	while (buf != ELEMS_END)
 	{
 		auto readElem = [&, this](const elem::EType type)
@@ -49,7 +58,7 @@ const grid::Mesh* MshReader::read(const string filename, const double x_dim)
 			for (int i = 0; i < elem::num_of_nebrs(type); i++)
 				msh >> nebrInds[i];
 
-			mesh->cells.push_back(elem::Element(type, vertInds, nebrInds));
+			mesh->cells.push_back(elem::Element(counter++, type, vertInds, nebrInds));
 		};
 
 		msh >> buf;
@@ -64,9 +73,6 @@ const grid::Mesh* MshReader::read(const string filename, const double x_dim)
 	}
 
 	msh.close();
-
-	for (int i = 0; i < mesh->cells.size(); i++)
-		mesh->cells[i].id = i;
 
 	return mesh;
 }

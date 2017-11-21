@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <vector>
 
 #define EQUALITY_TOLERANCE 1.E-9
 
@@ -10,6 +11,7 @@ namespace point
 {
 	struct Point
 	{
+		const int id;
 		union
 		{
 			double coords[3];
@@ -18,17 +20,24 @@ namespace point
 				double x;	double y;	double z;
 			};
 		};
+		std::vector<int> cells;
 
-		Point() {};
-		Point(const double _x, const double _y, const double _z) : x(_x), y(_y), z(_z) { };
+		Point() : id(-1) {};
+		Point(const double _x, const double _y, const double _z) : id(-1), x(_x), y(_y), z(_z) { };
+		Point(const int _id, const double _x, const double _y, const double _z) : id(_id), x(_x), y(_y), z(_z) { };
+		Point(const int _id, const double _x, const double _y, const double _z, const std::vector<int>& _cells) : Point(_id, _x, _y, _z)
+		{
+			this->cells = _cells;
+		};
 
-		Point(const Point& a)
+		Point(const Point& a) : id(a.id)
 		{
 			(*this) = a;
 		};
 		Point& operator=(const Point& rhs)
 		{
 			x = rhs.x, y = rhs.y, z = rhs.z;
+			cells = rhs.cells;
 			return *this;
 		};
 		Point& operator/=(const double k)

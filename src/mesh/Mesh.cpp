@@ -1,6 +1,7 @@
 #include "src/mesh/Mesh.hpp"
 #include <algorithm>
-#include <unordered_set>
+#include <numeric>
+#include <unordered_map>
 
 using namespace grid;
 using namespace point;
@@ -17,6 +18,8 @@ void Mesh::process_geometry()
 	setNebrId();
 	set_geom_props();
 	count_types();
+
+	set_interaction_regions();
 }
 void Mesh::count_types()
 {
@@ -143,6 +146,64 @@ void Mesh::set_geom_props()
 		}
 	}
 };
+void Mesh::set_interaction_regions()
+{
+	/*unordered_set<int> v;
+	for (int i = 0; i < pts.size(); i++)
+		v.insert(i);
+	// Equivalent to std::iota(v.begin(), v.end(), 0);
+	// generate(vec, vec + pts.size(), [n = 0]() mutable { return n++; });
+	int counter = 0;
+	unordered_set<int>::iterator tmp, it = v.begin();
+	for( ; it != v.end(); )
+	{ 
+		if (!accumulate(cells.begin(), cells.begin() + inner_size, 1, [&](int prev, Cell cur) -> int
+		{
+			if (cur.type == elem::HEX || cur.type == elem::PRISM)
+				return prev * accumulate(cur.verts.begin(), cur.verts.begin() + cur.verts_num, 1, [&](int notI, int cur_vert) {return notI * (cur_vert != *it); });
+			else
+				return prev;
+		}))
+		{
+			++it;
+			counter++;
+		}
+		else
+		{
+			tmp = it;
+			++tmp;
+			v.erase(it);
+			it = tmp;
+			counter++;
+		}
+	}*/
+
+	// Getting max z-axis coordinate
+	const double z_max = max_element(pts.begin(), pts.end(), [&](const Point& pt1, const Point& pt2) {return pt1.z < pt2.z; })->z;
+	struct Interaction
+	{
+		vector<int> cells;
+
+		Interaction() {};
+		Interaction(const vector<int>& _cells) : cells(_cells) {};
+		~Interaction() { cells.clear(); };
+	};
+	unordered_map<int, Interaction> interact;
+	bool isBorder = true;
+	for (const auto& pt : pts)
+	{
+		isBorder = true;
+		// Check is not border
+		for (const auto& cell : pt.cells)
+			if (cells[cell].type != elem::BORDER_HEX)
+			{
+				isBorder = false;
+				break;
+			}
+		if (!isBorder && fabs(pt.z - z_max) > EQUALITY_TOLERANCE)
+			interact[pt.id] = Interaction(pt.cells);
+	}
+}
 size_t Mesh::getCellsSize() const
 {
 	return cells.size();
