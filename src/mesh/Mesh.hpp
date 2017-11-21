@@ -90,6 +90,15 @@ namespace snapshotter
 
 namespace grid
 {
+	struct Interaction
+	{
+		std::vector<int> cells;
+
+		Interaction() {};
+		Interaction(const std::vector<int>& _cells) : cells(_cells) {};
+		~Interaction() { cells.clear(); };
+	};
+
 	static const int stencil = 11;
 	enum HalfType { LEFT, RIGHT };
 

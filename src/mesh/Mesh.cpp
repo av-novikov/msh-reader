@@ -180,14 +180,7 @@ void Mesh::set_interaction_regions()
 
 	// Getting max z-axis coordinate
 	const double z_max = max_element(pts.begin(), pts.end(), [&](const Point& pt1, const Point& pt2) {return pt1.z < pt2.z; })->z;
-	struct Interaction
-	{
-		vector<int> cells;
-
-		Interaction() {};
-		Interaction(const vector<int>& _cells) : cells(_cells) {};
-		~Interaction() { cells.clear(); };
-	};
+	
 	unordered_map<int, Interaction> interact;
 	bool isBorder = true;
 	for (const auto& pt : pts)
@@ -202,6 +195,14 @@ void Mesh::set_interaction_regions()
 			}
 		if (!isBorder && fabs(pt.z - z_max) > EQUALITY_TOLERANCE)
 			interact[pt.id] = Interaction(pt.cells);
+	}
+
+	// Setting neccessary adjoint cells
+	for (auto& inter : interact)
+	{
+		auto& cur_cells = inter.second.cells;
+		//const double z_avg = accumulate(cur_cells.begin(), cur_cells.end(), 0.0, [&](double sum, int j) -> double {return sum + cells[j].cent.z / cur_cells.size(); });
+		cur_cells.erase(std::remove_if(cur_cells.begin(), cur_cells.end(), [&](int i) { return (cells[i].cent.z - pts[inter.first].z < 0.0) ? true : false; }), cur_cells.end());
 	}
 }
 size_t Mesh::getCellsSize() const
