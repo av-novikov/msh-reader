@@ -65,24 +65,32 @@ void Mesh::set_geom_props()
 			el.nebrs[2].L = distance(el.cent, el.nebrs[2].cent);
 			el.nebrs[2].n = vector_product(pts[el.verts[1]] - pts[el.verts[0]], pts[el.verts[4]] - pts[el.verts[0]]);
 			el.nebrs[2].nu = { (el.nebrs[2].cent - el.cent).y, -(el.nebrs[2].cent - el.cent).x, 0.0 };
+			el.nebrs[2].T_plus = 2.0 * square(el.cent, el.nebrs[2].cent, el.nebrs[3].cent);
+			el.nebrs[2].T_minus = 2.0 * square(el.cent, el.nebrs[2].cent, el.nebrs[5].cent);
 
 			el.nebrs[3].S = square(pts[el.verts[1]], pts[el.verts[2]], pts[el.verts[6]], pts[el.verts[5]]);
 			el.nebrs[3].cent = (pts[el.verts[1]] + pts[el.verts[2]] + pts[el.verts[6]] + pts[el.verts[5]]) / 4.0;
 			el.nebrs[3].L = distance(el.cent, el.nebrs[3].cent);
 			el.nebrs[3].n = vector_product(pts[el.verts[2]] - pts[el.verts[1]], pts[el.verts[5]] - pts[el.verts[1]]);
 			el.nebrs[3].nu = { (el.nebrs[3].cent - el.cent).y, -(el.nebrs[3].cent - el.cent).x, 0.0 };
+			el.nebrs[3].T_plus = 2.0 * square(el.cent, el.nebrs[3].cent, el.nebrs[4].cent);
+			el.nebrs[3].T_minus = 2.0 * square(el.cent, el.nebrs[3].cent, el.nebrs[2].cent);
 
 			el.nebrs[4].S = square(pts[el.verts[2]], pts[el.verts[3]], pts[el.verts[7]], pts[el.verts[6]]);
 			el.nebrs[4].cent = (pts[el.verts[2]] + pts[el.verts[3]] + pts[el.verts[7]] + pts[el.verts[6]]) / 4.0;
 			el.nebrs[4].L = distance(el.cent, el.nebrs[4].cent);
 			el.nebrs[4].n = vector_product(pts[el.verts[3]] - pts[el.verts[2]], pts[el.verts[6]] - pts[el.verts[2]]);
 			el.nebrs[4].nu = { (el.nebrs[4].cent - el.cent).y, -(el.nebrs[4].cent - el.cent).x, 0.0 };
+			el.nebrs[4].T_plus = 2.0 * square(el.cent, el.nebrs[4].cent, el.nebrs[5].cent);
+			el.nebrs[4].T_minus = 2.0 * square(el.cent, el.nebrs[4].cent, el.nebrs[3].cent);
 
 			el.nebrs[5].S = square(pts[el.verts[3]], pts[el.verts[0]], pts[el.verts[4]], pts[el.verts[7]]);
 			el.nebrs[5].cent = (pts[el.verts[3]] + pts[el.verts[0]] + pts[el.verts[4]] + pts[el.verts[7]]) / 4.0;
 			el.nebrs[5].L = distance(el.cent, el.nebrs[5].cent);
 			el.nebrs[5].n = vector_product(pts[el.verts[0]] - pts[el.verts[3]], pts[el.verts[7]] - pts[el.verts[3]]);
 			el.nebrs[5].nu = { (el.nebrs[5].cent - el.cent).y, -(el.nebrs[5].cent - el.cent).x, 0.0 };
+			el.nebrs[5].T_plus = 2.0 * square(el.cent, el.nebrs[5].cent, el.nebrs[2].cent);
+			el.nebrs[5].T_minus = 2.0 * square(el.cent, el.nebrs[5].cent, el.nebrs[4].cent);
 
 			el.V = fabs(pts[el.verts[0]].z - pts[el.verts[4]].z) * (el.nebrs[0].S + el.nebrs[1].S) / 2.0;
 		}
@@ -107,18 +115,24 @@ void Mesh::set_geom_props()
 			el.nebrs[2].L = distance(el.cent, el.nebrs[2].cent);
 			el.nebrs[2].n = vector_product(pts[el.verts[1]] - pts[el.verts[0]], pts[el.verts[3]] - pts[el.verts[0]]) / 2.0;
 			el.nebrs[2].nu = { (el.nebrs[2].cent - el.cent).y, -(el.nebrs[2].cent - el.cent).x, 0.0 };
+			el.nebrs[2].T_plus = 2.0 * square(el.cent, el.nebrs[2].cent, el.nebrs[3].cent);
+			el.nebrs[2].T_minus = 2.0 * square(el.cent, el.nebrs[2].cent, el.nebrs[4].cent);
 
 			el.nebrs[3].S = square(pts[el.verts[1]], pts[el.verts[2]], pts[el.verts[5]], pts[el.verts[4]]);
 			el.nebrs[3].cent = (pts[el.verts[1]] + pts[el.verts[2]] + pts[el.verts[5]] + pts[el.verts[4]]) / 4.0;
 			el.nebrs[3].L = distance(el.cent, el.nebrs[3].cent);
 			el.nebrs[3].n = vector_product(pts[el.verts[2]] - pts[el.verts[1]], pts[el.verts[4]] - pts[el.verts[1]]) / 2.0;
 			el.nebrs[3].nu = { (el.nebrs[3].cent - el.cent).y, -(el.nebrs[3].cent - el.cent).x, 0.0 };
+			el.nebrs[3].T_plus = 2.0 * square(el.cent, el.nebrs[3].cent, el.nebrs[4].cent);
+			el.nebrs[3].T_minus = 2.0 * square(el.cent, el.nebrs[3].cent, el.nebrs[2].cent);
 
 			el.nebrs[4].S = square(pts[el.verts[2]], pts[el.verts[0]], pts[el.verts[3]], pts[el.verts[5]]);
 			el.nebrs[4].cent = (pts[el.verts[2]] + pts[el.verts[0]] + pts[el.verts[3]] + pts[el.verts[5]]) / 4.0;
 			el.nebrs[4].L = distance(el.cent, el.nebrs[4].cent);
 			el.nebrs[4].n = vector_product(pts[el.verts[0]] - pts[el.verts[2]], pts[el.verts[5]] - pts[el.verts[2]]) / 2.0;
 			el.nebrs[4].nu = { (el.nebrs[4].cent - el.cent).y, -(el.nebrs[4].cent - el.cent).x, 0.0 };
+			el.nebrs[4].T_plus = 2.0 * square(el.cent, el.nebrs[4].cent, el.nebrs[2].cent);
+			el.nebrs[4].T_minus = 2.0 * square(el.cent, el.nebrs[4].cent, el.nebrs[3].cent);
 
 			el.V = fabs(pts[el.verts[0]].z - pts[el.verts[3]].z) * (el.nebrs[0].S + el.nebrs[1].S) / 2.0;
 		}

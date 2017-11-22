@@ -42,11 +42,11 @@ namespace elem
 	struct Nebr
 	{
 		Id nebr;
-		std::array<Id, MAX_INTERFACES_STENCIL> stencilL, stencilR;
+		//std::array<Id, MAX_INTERFACES_STENCIL> stencilL, stencilR;
 		double S;
 		double L;
 		point::Point cent;
-		double omega1, omega2;
+		double T_plus, T_minus;
 		point::Point n, nu;
 	};
 
