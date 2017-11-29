@@ -6,6 +6,7 @@
 #include <cassert>
 #include <initializer_list>
 #include <array>
+#include <unordered_map>
 
 namespace elem
 {
@@ -39,8 +40,23 @@ namespace elem
 			return 6;
 	}
 	struct Id { int cell; char nebr; };
+	struct Interaction
+	{
+		std::vector<int> cells;
+
+		Interaction() {};
+		Interaction(const std::vector<int>& _cells) : cells(_cells) {};
+		~Interaction() { cells.clear(); };
+		Interaction& operator=(const Interaction& other)
+		{
+			cells = other.cells;
+			return *this;
+		};
+	};
+	typedef std::unordered_map<int, Interaction> InteractionMap;
 	struct Nebr
 	{
+		InteractionMap::const_iterator int_reg;
 		Id nebr;
 		//std::array<Id, MAX_INTERFACES_STENCIL> stencilL, stencilR;
 		double S;
@@ -90,15 +106,6 @@ namespace snapshotter
 
 namespace grid
 {
-	struct Interaction
-	{
-		std::vector<int> cells;
-
-		Interaction() {};
-		Interaction(const std::vector<int>& _cells) : cells(_cells) {};
-		~Interaction() { cells.clear(); };
-	};
-
 	static const int stencil = 11;
 	enum HalfType { LEFT, RIGHT };
 
@@ -109,10 +116,13 @@ namespace grid
 		template<typename> friend class AbstractSolver;
 	public:
 		typedef elem::Element Cell;
+		typedef elem::Interaction Interaction;
+		typedef elem::InteractionMap InteractionMap;
 
 		int inner_size, border_size, frac_size, pts_size;
 		std::vector<point::Point> pts;
 		std::vector<Cell> cells;
+		InteractionMap imap;
 	protected:
 		void set_geom_props();
 		void count_types();
