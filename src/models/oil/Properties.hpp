@@ -15,7 +15,7 @@ namespace oil
 		double beta;
 		double dens_stc;
 
-		double kx, ky;
+		double kx, ky, kz;
 
 		double height;
 		double p_init;

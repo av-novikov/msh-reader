@@ -157,6 +157,18 @@ adouble Oil::solveInner(const Cell& cell)
 	const auto prev = (*this)[cell.id].u_prev;
 
 	adouble H = props_sk[0].getPoro(cur.p) * props_oil.getDensity(cur.p) - props_sk[0].getPoro(prev.p) * props_oil.getDensity(prev.p);
+
+	int BETA;
+	double trans;
+	// Vertical cell
+	BETA = 0;
+	const Cell& beta = cells[cell.nebrs[BETA].nebr.cell];
+	trans = cell.nebrs[BETA].S * getKz(cell) * get()
+	H += ht / cell.V * 
+	for (char i = 0; i < cell.nebrs_num - 2; i++)
+	{
+
+	}
 	for (int i = 0; i < 3; i++)
 	{
 		/*const int nebr_idx = cell.nebr[i];

@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <numeric>
 #include <iterator>
+#include <unordered_map>
 
 using namespace grid;
 using namespace point;
@@ -195,9 +196,9 @@ void Mesh::set_interaction_regions()
 	// Getting max z-axis coordinate
 	const double z_max = max_element(pts.begin(), pts.end(), [&](const Point& pt1, const Point& pt2) {return pt1.z < pt2.z; })->z;
 	
-	//unordered_map<int, Interaction> interact;
+	unordered_map<int, Interaction> interact;
 	bool isBorder = true;
-	for (const auto& pt : pts)
+	for (auto& pt : pts)
 	{
 		isBorder = true;
 		// Check is not border
@@ -209,30 +210,11 @@ void Mesh::set_interaction_regions()
 			}
 		// All except top z-plane
 		if (!isBorder && fabs(pt.z - z_max) > EQUALITY_TOLERANCE)
-			imap[pt.id] = Interaction(pt.cells);
-	}
-
-	// Setting neccessary adjoint cells
-	for (auto& inter : imap)
-	{
-		auto& cur_cells = inter.second.cells;
-		//const double z_avg = accumulate(cur_cells.begin(), cur_cells.end(), 0.0, [&](double sum, int j) -> double {return sum + cells[j].cent.z / cur_cells.size(); });
-		cur_cells.erase(remove_if(cur_cells.begin(), cur_cells.end(), [&](int i) { return (cells[i].cent.z - pts[inter.first].z < 0.0) ? true : false; }), cur_cells.end());
-	}
-
-	int j;
-	for (int idx = 0; idx < inner_size; idx++)
-	{
-		const auto& cell = cells[idx];
-		for (char i = 0; i < cell.verts_num; i++)
 		{
-			j = 0;
-			if (cell.cent.z - pts[cell.verts[i]].z > 0.0)
-			{
-				auto it = imap.find(cell.verts[i]);
-				cell.nebrs[j + 2].int_reg = it;
-				j++;
-			}
+			pt.int_reg = new Interaction(pt.cells);
+			//interact[pt.id] = Interaction(pt.cells);
+			auto& cur_cells = pt.int_reg->cells;
+			cur_cells.erase(remove_if(cur_cells.begin(), cur_cells.end(), [&](int i) { return (cells[i].cent.z - pt.z < 0.0) ? true : false; }), cur_cells.end());
 		}
 	}
 }

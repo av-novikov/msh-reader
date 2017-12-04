@@ -24,14 +24,12 @@ namespace oil
 		std::vector<Skeleton_Props> props_sk;
 		Oil_Props props_oil;
 
-		/*const double getPerm(const Cell& cell) const
+		inline const double getKz(const Cell& cell) const
 		{
-			if (cell.type == CellType::INNER || cell.type == CellType::BORDER)
-				return props_sk[0].kx;
-			else
-				return props_sk[0].kx * 1000.0;
+			return props_sk[0].kz;
 		};
-		double getTrans(const Cell& cell1, const int idx, const Cell& cell2) const
+
+		/*double getTrans(const Cell& cell1, const int idx, const Cell& cell2) const
 		{
 			const double k1 = getPerm(cell1);
 			const double k2 = getPerm(cell2);

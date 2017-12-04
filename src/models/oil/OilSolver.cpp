@@ -151,21 +151,18 @@ void OilSolver::copySolution(const paralution::LocalVector<double>& sol)
 
 void OilSolver::computeJac()
 {
-	/*trace_on(0);
+	trace_on(0);
 
 	for (size_t i = 0; i < size; i++)
 		model->x[i].p <<= model->u_next[i * var_size];
 
-	const int well_idx = model->cellsNum - 1;
-	for (int i = 0; i < mesh->inner_cells; i++)
+	for (int i = 0; i < mesh->inner_size; i++)
 	{
 		const auto& cell = mesh->cells[i];
-		adouble isWellCell = (cell.type == CellType::WELL) ? true : false;
-		condassign(model->h[i], isWellCell,
-			(model->x[cell.id].p - model->x[well_idx].p) / model->P_dim,
-			cell.V * model->solveInner(cell));
+		adouble isWellCell = false;// (cell.type == CellType::WELL) ? true : false;
+		condassign(model->h[i], isWellCell, (adouble)model->P_dim, cell.V * model->solveInner(cell));
 	}
-	for (int i = mesh->border_beg; i < model->cellsNum - 1; i++)
+	/*for (int i = mesh->border_beg; i < model->cellsNum - 1; i++)
 	{
 		const auto& cell = mesh->cells[i];
 		model->h[i] = model->solveBorder(cell);
@@ -175,12 +172,12 @@ void OilSolver::computeJac()
 	adouble tmp = model->solveWell(mesh->cells[well_idx]);
 	condassign(model->h[well_idx], leftIsRate,
 		tmp + model->ht * model->props_oil.getDensity(model->x[well_idx].p) * model->Q_sum,
-		(model->x[well_idx].p - model->Pwf) / model->P_dim);
+		(model->x[well_idx].p - model->Pwf) / model->P_dim);*/
 
 	for (int i = 0; i < Model::var_size * size; i++)
 		model->h[i] >>= y[i];
 
-	trace_off();*/
+	trace_off();
 }
 void OilSolver::fill()
 {

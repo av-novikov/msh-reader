@@ -4,11 +4,25 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <new>
 
 #define EQUALITY_TOLERANCE 1.E-9
 
 namespace point
 {
+	struct Interaction
+	{
+		std::vector<int> cells;
+
+		Interaction() {};
+		Interaction(const std::vector<int>& _cells) : cells(_cells) {};
+		~Interaction() { cells.clear(); };
+		Interaction& operator=(const Interaction& other)
+		{
+			cells = other.cells;
+			return *this;
+		};
+	};
 	struct Point
 	{
 		const int id;
@@ -21,6 +35,7 @@ namespace point
 			};
 		};
 		std::vector<int> cells;
+		Interaction* int_reg;
 
 		Point() : id(-1) {};
 		Point(const double _x, const double _y, const double _z) : id(-1), x(_x), y(_y), z(_z) { };
@@ -29,7 +44,7 @@ namespace point
 		{
 			this->cells = _cells;
 		};
-
+		~Point() { cells.clear();	delete int_reg; };
 		Point(const Point& a) : id(a.id)
 		{
 			(*this) = a;
