@@ -47,6 +47,8 @@ namespace elem
 		double L;
 		point::Point cent;
 		double T_plus, T_minus;
+		point::Interaction* ireg_plus;
+		point::Interaction* ireg_minus;
 		point::Point n, nu;
 	};
 

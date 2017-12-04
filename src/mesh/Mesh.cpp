@@ -13,6 +13,8 @@ Mesh::Mesh()
 }
 Mesh::~Mesh()
 {
+	for (auto& pt : pts)
+		delete pt.int_reg;
 }
 void Mesh::process_geometry()
 {
@@ -163,36 +165,6 @@ void Mesh::set_geom_props()
 };
 void Mesh::set_interaction_regions()
 {
-	/*unordered_set<int> v;
-	for (int i = 0; i < pts.size(); i++)
-		v.insert(i);
-	// Equivalent to std::iota(v.begin(), v.end(), 0);
-	// generate(vec, vec + pts.size(), [n = 0]() mutable { return n++; });
-	int counter = 0;
-	unordered_set<int>::iterator tmp, it = v.begin();
-	for( ; it != v.end(); )
-	{ 
-		if (!accumulate(cells.begin(), cells.begin() + inner_size, 1, [&](int prev, Cell cur) -> int
-		{
-			if (cur.type == elem::HEX || cur.type == elem::PRISM)
-				return prev * accumulate(cur.verts.begin(), cur.verts.begin() + cur.verts_num, 1, [&](int notI, int cur_vert) {return notI * (cur_vert != *it); });
-			else
-				return prev;
-		}))
-		{
-			++it;
-			counter++;
-		}
-		else
-		{
-			tmp = it;
-			++tmp;
-			v.erase(it);
-			it = tmp;
-			counter++;
-		}
-	}*/
-
 	// Getting max z-axis coordinate
 	const double z_max = max_element(pts.begin(), pts.end(), [&](const Point& pt1, const Point& pt2) {return pt1.z < pt2.z; })->z;
 	
@@ -212,10 +184,68 @@ void Mesh::set_interaction_regions()
 		if (!isBorder && fabs(pt.z - z_max) > EQUALITY_TOLERANCE)
 		{
 			pt.int_reg = new Interaction(pt.cells);
-			//interact[pt.id] = Interaction(pt.cells);
 			auto& cur_cells = pt.int_reg->cells;
 			cur_cells.erase(remove_if(cur_cells.begin(), cur_cells.end(), [&](int i) { return (cells[i].cent.z - pt.z < 0.0) ? true : false; }), cur_cells.end());
 		}
+	}
+	
+	// Fill pointers to interaction regions in cells neighbours
+	for (int i = 0; i < inner_size; i++)
+	{
+		Cell& cell = cells[i];
+		if (cell.type == elem::HEX || cell.type == elem::BORDER_HEX)
+		{
+			// 1 or 5
+			const auto& cells1_plus = pts[cell.verts[1]].int_reg->cells;
+			cell.nebrs[2].ireg_plus = (find(cells1_plus.begin(), cells1_plus.end(), cell.id) != cells1_plus.end() ?
+										pts[cell.verts[1]].int_reg : pts[cell.verts[5]].int_reg);
+			// 0 or 4
+			const auto& cells1_minus = pts[cell.verts[0]].int_reg->cells;
+			cell.nebrs[2].ireg_minus = (find(cells1_minus.begin(), cells1_minus.end(), cell.id) != cells1_minus.end() ?
+										pts[cell.verts[0]].int_reg : pts[cell.verts[4]].int_reg);
+			
+			// 2 or 6
+			const auto& cells2_plus = pts[cell.verts[2]].int_reg->cells;
+			cell.nebrs[3].ireg_plus = (find(cells2_plus.begin(), cells2_plus.end(), cell.id) != cells2_plus.end() ?
+										pts[cell.verts[2]].int_reg : pts[cell.verts[6]].int_reg);
+			// 1 or 5
+			cell.nebrs[3].ireg_minus = cell.nebrs[2].ireg_plus;
+
+			// 3 or 7
+			const auto& cells3_plus = pts[cell.verts[3]].int_reg->cells;
+			cell.nebrs[4].ireg_plus = (find(cells3_plus.begin(), cells3_plus.end(), cell.id) != cells3_plus.end() ?
+										pts[cell.verts[3]].int_reg : pts[cell.verts[7]].int_reg);
+			// 2 or 6
+			cell.nebrs[4].ireg_minus = cell.nebrs[3].ireg_plus;
+
+			// 0 or 4
+			cell.nebrs[5].ireg_plus = cell.nebrs[2].ireg_minus;
+			// 3 or 3
+			cell.nebrs[5].ireg_minus = cell.nebrs[4].ireg_plus;
+		}
+		else if (cell.type == elem::PRISM)
+		{
+			// 1 or 4
+			const auto& cells1_plus = pts[cell.verts[1]].int_reg->cells;
+			cell.nebrs[2].ireg_plus = (find(cells1_plus.begin(), cells1_plus.end(), cell.id) != cells1_plus.end() ?
+										pts[cell.verts[1]].int_reg : pts[cell.verts[4]].int_reg);
+			// 0 or 3
+			const auto& cells1_minus = pts[cell.verts[0]].int_reg->cells;
+			cell.nebrs[2].ireg_minus = (find(cells1_minus.begin(), cells1_minus.end(), cell.id) != cells1_minus.end() ?
+										pts[cell.verts[0]].int_reg : pts[cell.verts[3]].int_reg);
+			
+			// 2 or 5
+			const auto& cells2_plus = pts[cell.verts[2]].int_reg->cells;
+			cell.nebrs[3].ireg_plus = (find(cells2_plus.begin(), cells2_plus.end(), cell.id) != cells2_plus.end() ?
+										pts[cell.verts[2]].int_reg : pts[cell.verts[5]].int_reg);
+			// 1 or 4
+			cell.nebrs[3].ireg_minus = cell.nebrs[2].ireg_plus;
+
+			// 0 or 3
+			cell.nebrs[4].ireg_plus = cell.nebrs[2].ireg_minus;
+			// 2 or 5
+			cell.nebrs[4].ireg_minus = cell.nebrs[3].ireg_plus;
+		}	
 	}
 }
 size_t Mesh::getCellsSize() const
