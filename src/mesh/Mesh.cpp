@@ -1,8 +1,11 @@
 #include "src/mesh/Mesh.hpp"
 #include <algorithm>
 #include <numeric>
-#include <iterator>
+//#include <iterator>
 #include <unordered_map>
+#include <utility>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 using namespace grid;
 using namespace point;
@@ -41,7 +44,6 @@ void Mesh::count_types()
 void Mesh::set_geom_props()
 {
 	double tmp1, tmp2;
-	int cur_id, prev_id, next_id, counter;
 
 	for (auto& el : cells)
 	{
@@ -168,7 +170,6 @@ void Mesh::set_interaction_regions()
 	// Getting max z-axis coordinate
 	const double z_max = max_element(pts.begin(), pts.end(), [&](const Point& pt1, const Point& pt2) {return pt1.z < pt2.z; })->z;
 	
-	unordered_map<int, Interaction> interact;
 	bool isBorder = true;
 	for (auto& pt : pts)
 	{
@@ -185,10 +186,34 @@ void Mesh::set_interaction_regions()
 		{
 			pt.int_reg = new Interaction(pt.cells);
 			auto& cur_cells = pt.int_reg->cells;
-			cur_cells.erase(remove_if(cur_cells.begin(), cur_cells.end(), [&](int i) { return (cells[i].cent.z - pt.z < 0.0) ? true : false; }), cur_cells.end());
+			cur_cells.erase(remove_if(cur_cells.begin(), cur_cells.end(), [&](Id cell_id) { return (cells[cell_id.cell].cent.z - pt.z < 0.0) ? true : false; }), cur_cells.end());
 		}
 	}
 	
+	// Order the cells in interaction regions
+	for (auto& pt : pts)
+	{
+		if (pt.int_reg != nullptr)
+		{
+			auto& ireg_cells = pt.int_reg->cells;
+			sort(ireg_cells.begin(), ireg_cells.end(), [=](Id& id1, Id& id2)
+			{
+				auto get_phi = [&, this](const Cell& cell) -> double
+				{
+					double phi;
+					const double x = cell.cent.x - pt.x;
+					const double y = cell.cent.y - pt.y;
+					if (x < 0.0)
+						phi = M_PI + atan(y / x);
+					else
+						phi = (y < 0.0 ? 2.0 * M_PI + atan(y / x) : atan(y / x));
+					return phi;
+				};
+				return get_phi(cells[id1.cell]) < get_phi(cells[id2.cell]);
+			});
+		}
+	}
+
 	// Fill pointers to interaction regions in cells neighbours
 	for (int i = 0; i < inner_size; i++)
 	{
@@ -198,16 +223,16 @@ void Mesh::set_interaction_regions()
 			// 1 or 5
 			const auto& cells1_plus = pts[cell.verts[1]].int_reg->cells;
 			cell.nebrs[2].ireg_plus = (find(cells1_plus.begin(), cells1_plus.end(), cell.id) != cells1_plus.end() ?
-										pts[cell.verts[1]].int_reg : pts[cell.verts[5]].int_reg);
+				pts[cell.verts[1]].int_reg : pts[cell.verts[5]].int_reg);
 			// 0 or 4
 			const auto& cells1_minus = pts[cell.verts[0]].int_reg->cells;
 			cell.nebrs[2].ireg_minus = (find(cells1_minus.begin(), cells1_minus.end(), cell.id) != cells1_minus.end() ?
-										pts[cell.verts[0]].int_reg : pts[cell.verts[4]].int_reg);
-			
+				pts[cell.verts[0]].int_reg : pts[cell.verts[4]].int_reg);
+
 			// 2 or 6
 			const auto& cells2_plus = pts[cell.verts[2]].int_reg->cells;
 			cell.nebrs[3].ireg_plus = (find(cells2_plus.begin(), cells2_plus.end(), cell.id) != cells2_plus.end() ?
-										pts[cell.verts[2]].int_reg : pts[cell.verts[6]].int_reg);
+				pts[cell.verts[2]].int_reg : pts[cell.verts[6]].int_reg);
 			// 1 or 5
 			cell.nebrs[3].ireg_minus = cell.nebrs[2].ireg_plus;
 
@@ -247,6 +272,16 @@ void Mesh::set_interaction_regions()
 			cell.nebrs[4].ireg_minus = cell.nebrs[3].ireg_plus;
 		}	
 	}
+
+	// Fill nebr indices in interaction regions
+	/*for (int i = 0; i < inner_size; i++)
+	{
+		const auto& cell = cells[i];
+		for (char i = 0; i < cell.nebrs_num; i++)
+		{
+			cell.nebrs[i].ireg_minus->cells
+		}
+	}*/
 }
 size_t Mesh::getCellsSize() const
 {

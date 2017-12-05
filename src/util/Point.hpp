@@ -10,12 +10,24 @@
 
 namespace point
 {
+	struct Id 
+	{ 
+		int cell;	char nebr;
+	};
+	bool operator==(const Id& id, const int _cell)
+	{
+		return (id.cell == _cell);
+	};
 	struct Interaction
 	{
-		std::vector<int> cells;
+		std::vector<Id> cells;
 
 		Interaction() {};
-		Interaction(const std::vector<int>& _cells) : cells(_cells) {};
+		Interaction(const std::vector<int>& _cells)
+		{
+			for (const auto& cell : _cells)
+				cells.push_back(Id{ cell, -1 });
+		};
 		~Interaction() { cells.clear(); };
 		Interaction& operator=(const Interaction& other)
 		{
@@ -37,7 +49,7 @@ namespace point
 		std::vector<int> cells;
 		Interaction* int_reg;
 
-		Point() : id(-1) {};
+		Point() : id(-1), int_reg(nullptr) {};
 		Point(const double _x, const double _y, const double _z) : id(-1), x(_x), y(_y), z(_z) { };
 		Point(const int _id, const double _x, const double _y, const double _z) : id(_id), x(_x), y(_y), z(_z) { };
 		Point(const int _id, const double _x, const double _y, const double _z, const std::vector<int>& _cells) : Point(_id, _x, _y, _z)

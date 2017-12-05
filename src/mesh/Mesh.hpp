@@ -38,11 +38,9 @@ namespace elem
 		else if (type == HEX || type == BORDER_HEX)
 			return 6;
 	}
-	struct Id { int cell; char nebr; };
 	struct Nebr
 	{
-		Id nebr;
-		//std::array<Id, MAX_INTERFACES_STENCIL> stencilL, stencilR;
+		point::Id nebr;
 		double S;
 		double L;
 		point::Point cent;
