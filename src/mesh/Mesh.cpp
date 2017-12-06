@@ -1,7 +1,6 @@
 #include "src/mesh/Mesh.hpp"
 #include <algorithm>
 #include <numeric>
-//#include <iterator>
 #include <unordered_map>
 #include <utility>
 #define _USE_MATH_DEFINES
@@ -70,32 +69,28 @@ void Mesh::set_geom_props()
 			el.nebrs[2].L = distance(el.cent, el.nebrs[2].cent);
 			el.nebrs[2].n = vector_product(pts[el.verts[1]] - pts[el.verts[0]], pts[el.verts[4]] - pts[el.verts[0]]);
 			el.nebrs[2].nu = { (el.nebrs[2].cent - el.cent).y, -(el.nebrs[2].cent - el.cent).x, 0.0 };
-			el.nebrs[2].T_plus = 2.0 * square(el.cent, el.nebrs[2].cent, el.nebrs[3].cent);
-			el.nebrs[2].T_minus = 2.0 * square(el.cent, el.nebrs[2].cent, el.nebrs[5].cent);
+			el.T[0] = 2.0 * square(el.cent, el.nebrs[2].cent, el.nebrs[3].cent);
 
 			el.nebrs[3].S = square(pts[el.verts[1]], pts[el.verts[2]], pts[el.verts[6]], pts[el.verts[5]]);
 			el.nebrs[3].cent = (pts[el.verts[1]] + pts[el.verts[2]] + pts[el.verts[6]] + pts[el.verts[5]]) / 4.0;
 			el.nebrs[3].L = distance(el.cent, el.nebrs[3].cent);
 			el.nebrs[3].n = vector_product(pts[el.verts[2]] - pts[el.verts[1]], pts[el.verts[5]] - pts[el.verts[1]]);
 			el.nebrs[3].nu = { (el.nebrs[3].cent - el.cent).y, -(el.nebrs[3].cent - el.cent).x, 0.0 };
-			el.nebrs[3].T_plus = 2.0 * square(el.cent, el.nebrs[3].cent, el.nebrs[4].cent);
-			el.nebrs[3].T_minus = 2.0 * square(el.cent, el.nebrs[3].cent, el.nebrs[2].cent);
+			el.T[1] = 2.0 * square(el.cent, el.nebrs[3].cent, el.nebrs[4].cent);
 
 			el.nebrs[4].S = square(pts[el.verts[2]], pts[el.verts[3]], pts[el.verts[7]], pts[el.verts[6]]);
 			el.nebrs[4].cent = (pts[el.verts[2]] + pts[el.verts[3]] + pts[el.verts[7]] + pts[el.verts[6]]) / 4.0;
 			el.nebrs[4].L = distance(el.cent, el.nebrs[4].cent);
 			el.nebrs[4].n = vector_product(pts[el.verts[3]] - pts[el.verts[2]], pts[el.verts[6]] - pts[el.verts[2]]);
 			el.nebrs[4].nu = { (el.nebrs[4].cent - el.cent).y, -(el.nebrs[4].cent - el.cent).x, 0.0 };
-			el.nebrs[4].T_plus = 2.0 * square(el.cent, el.nebrs[4].cent, el.nebrs[5].cent);
-			el.nebrs[4].T_minus = 2.0 * square(el.cent, el.nebrs[4].cent, el.nebrs[3].cent);
+			el.T[2] = 2.0 * square(el.cent, el.nebrs[4].cent, el.nebrs[5].cent);
 
 			el.nebrs[5].S = square(pts[el.verts[3]], pts[el.verts[0]], pts[el.verts[4]], pts[el.verts[7]]);
 			el.nebrs[5].cent = (pts[el.verts[3]] + pts[el.verts[0]] + pts[el.verts[4]] + pts[el.verts[7]]) / 4.0;
 			el.nebrs[5].L = distance(el.cent, el.nebrs[5].cent);
 			el.nebrs[5].n = vector_product(pts[el.verts[0]] - pts[el.verts[3]], pts[el.verts[7]] - pts[el.verts[3]]);
 			el.nebrs[5].nu = { (el.nebrs[5].cent - el.cent).y, -(el.nebrs[5].cent - el.cent).x, 0.0 };
-			el.nebrs[5].T_plus = 2.0 * square(el.cent, el.nebrs[5].cent, el.nebrs[2].cent);
-			el.nebrs[5].T_minus = 2.0 * square(el.cent, el.nebrs[5].cent, el.nebrs[4].cent);
+			el.T[3] = 2.0 * square(el.cent, el.nebrs[5].cent, el.nebrs[2].cent);
 
 			el.V = fabs(pts[el.verts[0]].z - pts[el.verts[4]].z) * (el.nebrs[0].S + el.nebrs[1].S) / 2.0;
 		}
@@ -120,24 +115,21 @@ void Mesh::set_geom_props()
 			el.nebrs[2].L = distance(el.cent, el.nebrs[2].cent);
 			el.nebrs[2].n = vector_product(pts[el.verts[1]] - pts[el.verts[0]], pts[el.verts[3]] - pts[el.verts[0]]) / 2.0;
 			el.nebrs[2].nu = { (el.nebrs[2].cent - el.cent).y, -(el.nebrs[2].cent - el.cent).x, 0.0 };
-			el.nebrs[2].T_plus = 2.0 * square(el.cent, el.nebrs[2].cent, el.nebrs[3].cent);
-			el.nebrs[2].T_minus = 2.0 * square(el.cent, el.nebrs[2].cent, el.nebrs[4].cent);
+			el.T[0] = 2.0 * square(el.cent, el.nebrs[2].cent, el.nebrs[3].cent);
 
 			el.nebrs[3].S = square(pts[el.verts[1]], pts[el.verts[2]], pts[el.verts[5]], pts[el.verts[4]]);
 			el.nebrs[3].cent = (pts[el.verts[1]] + pts[el.verts[2]] + pts[el.verts[5]] + pts[el.verts[4]]) / 4.0;
 			el.nebrs[3].L = distance(el.cent, el.nebrs[3].cent);
 			el.nebrs[3].n = vector_product(pts[el.verts[2]] - pts[el.verts[1]], pts[el.verts[4]] - pts[el.verts[1]]) / 2.0;
 			el.nebrs[3].nu = { (el.nebrs[3].cent - el.cent).y, -(el.nebrs[3].cent - el.cent).x, 0.0 };
-			el.nebrs[3].T_plus = 2.0 * square(el.cent, el.nebrs[3].cent, el.nebrs[4].cent);
-			el.nebrs[3].T_minus = 2.0 * square(el.cent, el.nebrs[3].cent, el.nebrs[2].cent);
+			el.T[1] = 2.0 * square(el.cent, el.nebrs[3].cent, el.nebrs[4].cent);
 
 			el.nebrs[4].S = square(pts[el.verts[2]], pts[el.verts[0]], pts[el.verts[3]], pts[el.verts[5]]);
 			el.nebrs[4].cent = (pts[el.verts[2]] + pts[el.verts[0]] + pts[el.verts[3]] + pts[el.verts[5]]) / 4.0;
 			el.nebrs[4].L = distance(el.cent, el.nebrs[4].cent);
 			el.nebrs[4].n = vector_product(pts[el.verts[0]] - pts[el.verts[2]], pts[el.verts[5]] - pts[el.verts[2]]) / 2.0;
 			el.nebrs[4].nu = { (el.nebrs[4].cent - el.cent).y, -(el.nebrs[4].cent - el.cent).x, 0.0 };
-			el.nebrs[4].T_plus = 2.0 * square(el.cent, el.nebrs[4].cent, el.nebrs[2].cent);
-			el.nebrs[4].T_minus = 2.0 * square(el.cent, el.nebrs[4].cent, el.nebrs[3].cent);
+			el.T[2] = 2.0 * square(el.cent, el.nebrs[4].cent, el.nebrs[2].cent);
 
 			el.V = fabs(pts[el.verts[0]].z - pts[el.verts[3]].z) * (el.nebrs[0].S + el.nebrs[1].S) / 2.0;
 		}
@@ -198,18 +190,20 @@ void Mesh::set_interaction_regions()
 			auto& ireg_cells = pt.int_reg->cells;
 			sort(ireg_cells.begin(), ireg_cells.end(), [=](Id& id1, Id& id2)
 			{
-				auto get_phi = [&, this](const Cell& cell) -> double
-				{
-					double phi;
-					const double x = cell.cent.x - pt.x;
-					const double y = cell.cent.y - pt.y;
-					if (x < 0.0)
-						phi = M_PI + atan(y / x);
-					else
-						phi = (y < 0.0 ? 2.0 * M_PI + atan(y / x) : atan(y / x));
-					return phi;
-				};
-				return get_phi(cells[id1.cell]) < get_phi(cells[id2.cell]);
+				double phi1, phi2;
+				const Cell& cell1 = cells[id1.cell];	const Cell& cell2 = cells[id2.cell];
+				const double x1 = cell1.cent.x - pt.x;	const double y1 = cell1.cent.y - pt.y;
+				const double x2 = cell2.cent.x - pt.x;	const double y2 = cell2.cent.y - pt.y;
+				if (x1 < 0.0)
+					phi1 = M_PI + atan(y1 / x1);
+				else
+					phi1 = (y1 < 0.0 ? 2.0 * M_PI + atan(y1 / x1) : atan(y1 / x1));
+				if (x2 < 0.0)
+					phi2 = M_PI + atan(y2 / x2);
+				else
+					phi2 = (y2 < 0.0 ? 2.0 * M_PI + atan(y2 / x2) : atan(y2 / x2));
+
+				return phi1 < phi2;
 			});
 		}
 	}
@@ -271,17 +265,18 @@ void Mesh::set_interaction_regions()
 			// 2 or 5
 			cell.nebrs[4].ireg_minus = cell.nebrs[3].ireg_plus;
 		}	
-	}
 
-	// Fill nebr indices in interaction regions
-	/*for (int i = 0; i < inner_size; i++)
-	{
-		const auto& cell = cells[i];
-		for (char i = 0; i < cell.nebrs_num; i++)
+		// Fill nebr indices in interaction regions
+		/*for (char i = 0; i < cell.nebrs_num; i++)
 		{
-			cell.nebrs[i].ireg_minus->cells
-		}
-	}*/
+			auto& reg_cells = cell.nebrs[i].ireg_minus->cells;
+			auto& it = find(reg_cells.begin(), reg_cells.end(), cell.id);
+			if (it != reg_cells.end())
+			{
+				it->nebr = i;
+			}
+		}*/
+	}
 }
 size_t Mesh::getCellsSize() const
 {

@@ -10,8 +10,8 @@
 
 namespace point
 {
-	struct Id 
-	{ 
+	struct Id
+	{
 		int cell;	char nebr;
 	};
 	bool operator==(const Id& id, const int _cell)
