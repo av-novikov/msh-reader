@@ -10,23 +10,29 @@
 
 namespace point
 {
+	enum HalfType { PLUS, MINUS };
 	struct Id
 	{
 		int cell;	char nebr;
 	};
-	bool operator==(const Id& id, const int _cell)
+	struct RegCellId
+	{
+		int cell;
+		char nebr [2];
+	};
+	bool operator==(const RegCellId& id, const int _cell)
 	{
 		return (id.cell == _cell);
 	};
 	struct Interaction
 	{
-		std::vector<Id> cells;
+		std::vector<RegCellId> cells;
 
 		Interaction() {};
 		Interaction(const std::vector<int>& _cells)
 		{
 			for (const auto& cell : _cells)
-				cells.push_back(Id{ cell, -1 });
+				cells.push_back(RegCellId{ cell, {-1, -1} });
 		};
 		~Interaction() { cells.clear(); };
 		Interaction& operator=(const Interaction& other)

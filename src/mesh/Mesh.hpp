@@ -18,7 +18,7 @@ namespace snapshotter
 
 namespace grid
 {
-	static const int stencil = 11;
+	static const int stencil = -11;
 
 	class Mesh
 	{

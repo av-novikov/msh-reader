@@ -35,7 +35,6 @@ namespace elem
 			return 6;
 	}
 
-	enum HalfType { PLUS, MINUS };
 	struct Nebr
 	{
 		point::Id nebr;
