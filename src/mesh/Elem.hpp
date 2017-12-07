@@ -34,14 +34,15 @@ namespace elem
 		else if (type == HEX || type == BORDER_HEX)
 			return 6;
 	}
+
+	enum HalfType { PLUS, MINUS };
 	struct Nebr
 	{
 		point::Id nebr;
 		double S;
 		double L;
 		point::Point cent;
-		point::Interaction* ireg_plus;
-		point::Interaction* ireg_minus;
+		point::Interaction* ireg [2];
 		point::Point n, nu;
 	};
 

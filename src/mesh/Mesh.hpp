@@ -19,7 +19,6 @@ namespace snapshotter
 namespace grid
 {
 	static const int stencil = 11;
-	enum HalfType { LEFT, RIGHT };
 
 	class Mesh
 	{
