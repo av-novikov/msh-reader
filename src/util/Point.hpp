@@ -20,7 +20,7 @@ namespace point
 		int cell;
 		char nebr [2];
 	};
-	bool operator==(const RegCellId& id, const int _cell)
+	inline bool operator==(const RegCellId& id, const int _cell)
 	{
 		return (id.cell == _cell);
 	};
@@ -34,15 +34,17 @@ namespace point
 			for (const auto& cell : _cells)
 				cells.push_back(RegCellId{ cell, {-1, -1} });
 		};
-		~Interaction() { cells.clear(); };
+		~Interaction() {};
 		Interaction& operator=(const Interaction& other)
 		{
 			cells = other.cells;
 			return *this;
 		};
 	};
+	enum PointType {INNER, BORDER};
 	struct Point
 	{
+		PointType type;
 		const int id;
 		union
 		{
@@ -55,14 +57,18 @@ namespace point
 		std::vector<int> cells;
 		Interaction* int_reg;
 
-		Point() : id(-1), int_reg(nullptr) {};
-		Point(const double _x, const double _y, const double _z) : id(-1), x(_x), y(_y), z(_z) { };
-		Point(const int _id, const double _x, const double _y, const double _z) : id(_id), x(_x), y(_y), z(_z) { };
+		Point() : id(-1), int_reg(nullptr), type(INNER) {};
+		Point(const double _x, const double _y, const double _z) : id(-1), x(_x), y(_y), z(_z), int_reg(nullptr), type(INNER) { };
+		Point(const int _id, const double _x, const double _y, const double _z) : id(_id), x(_x), y(_y), z(_z), int_reg(nullptr), type(INNER) { };
 		Point(const int _id, const double _x, const double _y, const double _z, const std::vector<int>& _cells) : Point(_id, _x, _y, _z)
 		{
 			this->cells = _cells;
 		};
-		~Point() { cells.clear();	delete int_reg; };
+		~Point() 
+		{ 
+			if(int_reg != nullptr)
+				delete int_reg; 
+		};
 		Point(const Point& a) : id(a.id)
 		{
 			(*this) = a;
@@ -71,6 +77,8 @@ namespace point
 		{
 			x = rhs.x, y = rhs.y, z = rhs.z;
 			cells = rhs.cells;
+			int_reg = rhs.int_reg;
+			type = rhs.type;
 			return *this;
 		};
 		Point& operator/=(const double k)

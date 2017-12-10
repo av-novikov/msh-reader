@@ -173,6 +173,8 @@ void Mesh::set_interaction_regions()
 				isBorder = false;
 				break;
 			}
+			else
+				pt.type = point::BORDER;
 		// All except top z-plane
 		if (!isBorder && fabs(pt.z - z_max) > EQUALITY_TOLERANCE)
 		{
@@ -328,6 +330,10 @@ void Mesh::set_interaction_regions()
 			{	it->nebr[1] = 4;	it->nebr[0] = 3;	}
 		}	
 	}
+}
+void Mesh::calc_transmissibilities()
+{
+
 }
 size_t Mesh::getCellsSize() const
 {

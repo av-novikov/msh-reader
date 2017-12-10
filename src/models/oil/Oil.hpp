@@ -24,6 +24,10 @@ namespace oil
 		std::vector<Skeleton_Props> props_sk;
 		Oil_Props props_oil;
 
+		grid::Mesh::Perm_XY getPerm_XY(const Cell& cell) 
+		{
+			return{ 0.0, 0.0 };
+		};
 		inline const double getKz(const Cell& cell) const
 		{
 			return props_sk[0].kz;

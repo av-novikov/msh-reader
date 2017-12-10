@@ -6,6 +6,7 @@
 #include <vector>
 #include <cassert>
 #include <initializer_list>
+#include <functional>
 
 namespace mshreader
 {
@@ -27,10 +28,13 @@ namespace grid
 		template<typename> friend class AbstractSolver;
 	public:
 		typedef elem::Element Cell;
+		struct Perm_XY { double kx, ky; };
+		typedef std::function<Perm_XY(const Cell&)> Perm_Getter;
 
 		int inner_size, border_size, frac_size, pts_size;
 		std::vector<point::Point> pts;
 		std::vector<Cell> cells;
+		Perm_Getter get_XY_perm;
 	protected:
 		void set_geom_props();
 		void count_types();
@@ -44,6 +48,8 @@ namespace grid
 		};
 		void set_interaction_regions();
 
+
+
 	public:
 		double Volume;
 
@@ -55,6 +61,7 @@ namespace grid
 		size_t getCellsSize() const;
 		inline Cell& getCell(const int i) {	return cells[i]; };
 		inline const Cell& getCell(const int i) const { return cells[i]; };
+		void calc_transmissibilities();
 	};
 }
 

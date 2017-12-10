@@ -117,10 +117,6 @@ public:
 		setProps(props);
 		loadMesh(nebrFileName);
 
-		u_prev.resize(varNum);
-		u_iter.resize(varNum);
-		u_next.resize(varNum);
-
 		setPerforated();
 		setInitialState();
 	};

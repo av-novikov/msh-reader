@@ -108,6 +108,9 @@ void Oil::setInitialState()
 
 	x = new TapeVariable[cellsNum];
 	h = new adouble[var_size * cellsNum];
+
+	grid::Mesh::Perm_XY ad = getPerm_XY(mesh->cells[5]);
+	mesh->get_XY_perm = bind(&Oil::getPerm_XY, this, placeholders::_1);
 }
 void Oil::setPeriod(const int period)
 {
@@ -158,7 +161,7 @@ adouble Oil::solveInner(const Cell& cell)
 
 	adouble H = props_sk[0].getPoro(cur.p) * props_oil.getDensity(cur.p) - props_sk[0].getPoro(prev.p) * props_oil.getDensity(prev.p);
 
-	int BETA;
+	/*int BETA;
 	double trans;
 	// Vertical cell
 	BETA = 0;
@@ -171,15 +174,15 @@ adouble Oil::solveInner(const Cell& cell)
 	}
 	for (int i = 0; i < 3; i++)
 	{
-		/*const int nebr_idx = cell.nebr[i];
+		const int nebr_idx = cell.nebr[i];
 		const auto& beta = mesh->cells[nebr_idx];
 		const auto& nebr = x[nebr_idx];
 
 		H += ht / cell.V * getTrans(cell, i, beta) *
 			linearAppr(props_oil.getDensity(cur.p) / props_oil.getViscosity(cur.p), cell.dist[i],
 				props_oil.getDensity(nebr.p) / props_oil.getViscosity(nebr.p), getDistance(beta, cell)) *
-				(cur.p - nebr.p);*/
-	}
+				(cur.p - nebr.p);
+	}*/
 	return H;
 }
 adouble Oil::solveBorder(const Cell& cell)
