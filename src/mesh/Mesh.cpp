@@ -160,7 +160,7 @@ void Mesh::set_geom_props()
 void Mesh::set_interaction_regions()
 {
 	// Getting max z-axis coordinate
-	const double z_max = max_element(pts.begin(), pts.end(), [&](const Point& pt1, const Point& pt2) {return pt1.z < pt2.z; })->z;
+	z_max = max_element(pts.begin(), pts.end(), [&](const Point& pt1, const Point& pt2) {return pt1.z < pt2.z; })->z;
 	
 	bool isBorder = true;
 	for (auto& pt : pts)
@@ -173,8 +173,8 @@ void Mesh::set_interaction_regions()
 				isBorder = false;
 				break;
 			}
-			else
-				pt.type = point::BORDER;
+		if (isBorder)
+			pt.type = point::BORDER;
 		// All except top z-plane
 		if (!isBorder && fabs(pt.z - z_max) > EQUALITY_TOLERANCE)
 		{
@@ -190,7 +190,7 @@ void Mesh::set_interaction_regions()
 		if (pt.int_reg != nullptr)
 		{
 			auto& ireg_cells = pt.int_reg->cells;
-			sort(ireg_cells.begin(), ireg_cells.end(), [=](RegCellId& id1, RegCellId& id2)
+			sort(ireg_cells.begin(), ireg_cells.end(), [&](RegCellId& id1, RegCellId& id2)
 			{
 				double phi1, phi2;
 				const Cell& cell1 = cells[id1.cell];	const Cell& cell2 = cells[id2.cell];
@@ -333,7 +333,21 @@ void Mesh::set_interaction_regions()
 }
 void Mesh::calc_transmissibilities()
 {
-
+	typedef array<array<double, 2>, 2> Interface;
+	for (auto& pt : pts)
+	{
+		if (pt.type == point::INNER && fabs(pt.z - z_max) > EQUALITY_TOLERANCE)
+		{
+			auto& reg = *pt.int_reg;
+			vector<Interface> omega(reg.cells.size());
+			for(const auto& cell_id : reg.cells)
+			{
+				const auto& cell = cells[cell_id.cell];
+				const auto& nebr1 = cells[cell_id.cell].nebrs[cell_id.nebr[0]];
+				const auto& nebr2 = cells[cell_id.cell].nebrs[cell_id.nebr[1]];
+			}
+		}
+	}
 }
 size_t Mesh::getCellsSize() const
 {

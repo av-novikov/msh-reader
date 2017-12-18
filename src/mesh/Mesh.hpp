@@ -36,6 +36,8 @@ namespace grid
 		std::vector<Cell> cells;
 		Perm_Getter get_XY_perm;
 	protected:
+		double z_max;
+
 		void set_geom_props();
 		void count_types();
 		void setNebrId();
@@ -47,8 +49,6 @@ namespace grid
 			exit(-1);
 		};
 		void set_interaction_regions();
-
-
 
 	public:
 		double Volume;
