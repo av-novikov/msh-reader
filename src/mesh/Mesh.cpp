@@ -156,6 +156,21 @@ void Mesh::set_geom_props()
 			el.nebrs[0].n = vector_product(pts[el.verts[1]] - pts[el.verts[0]], pts[el.verts[3]] - pts[el.verts[0]]);
 		}
 	}
+
+	// Cell Z-orientation transparency checking
+	for (const auto& cell : cells)
+	{
+		if (cell.type == elem::HEX || cell.type == elem::BORDER_HEX || cell.type == elem::PRISM)
+		{
+			for (int i = 0; i < cell.verts_num / 2; i++)
+			{
+				assert(pts[cell.verts[i]].z == pts[cell.verts[0]].z);
+				assert(pts[cell.verts[i]].z < pts[cell.verts[i + cell.verts_num / 2]].z);
+			}
+			for (int i = cell.verts_num / 2; i < cell.verts_num; i++)
+				assert(pts[cell.verts[i]].z == pts[cell.verts[cell.verts_num / 2]].z);
+		}
+	}
 };
 void Mesh::set_interaction_regions()
 {
