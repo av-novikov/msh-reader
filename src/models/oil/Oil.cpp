@@ -109,8 +109,8 @@ void Oil::setInitialState()
 	x = new TapeVariable[cellsNum];
 	h = new adouble[var_size * cellsNum];
 
-	grid::Mesh::Perm_XY ad = getPerm_XY(mesh->cells[5]);
 	mesh->get_XY_perm = bind(&Oil::getPerm_XY, this, placeholders::_1);
+	setTrans();
 }
 void Oil::setPeriod(const int period)
 {
@@ -152,6 +152,7 @@ void Oil::setTrans()
 
 			}
 	}*/
+	mesh->calc_transmissibilities();
 }
 
 adouble Oil::solveInner(const Cell& cell)

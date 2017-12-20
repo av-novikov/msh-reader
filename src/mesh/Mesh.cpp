@@ -24,7 +24,7 @@ void Mesh::process_geometry()
 	set_geom_props();
 	count_types();
 
-	set_interaction_regions();
+	set_interaction_regions(); 
 }
 void Mesh::count_types()
 {
@@ -228,7 +228,6 @@ void Mesh::set_interaction_regions()
 	// Fill pointers to interaction regions in cells neighbours
 	using point::HalfType;
 	vector<RegCellId>::iterator it;
-	Point* vert;
 	auto get_phi = [](const Point& vert, const Point& nebr_cent) -> double
 	{
 		double phi;
@@ -239,110 +238,105 @@ void Mesh::set_interaction_regions()
 			phi = (y < 0.0 ? 2.0 * M_PI + atan(y / x) : atan(y / x));
 		return phi;
 	};
-
 	for (int i = 0; i < inner_size; i++)
 	{
 		Cell& cell = cells[i];
 		if (cell.type == elem::HEX || cell.type == elem::BORDER_HEX)
 		{
 			// 1 or 5
-			auto& cells1_plus = pts[cell.verts[1]].int_reg->cells;
-			it = find(cells1_plus.begin(), cells1_plus.end(), cell.id);
-			if (it != cells1_plus.end())
-				vert = &pts[cell.verts[1]];
-			else
-				vert = &pts[cell.verts[5]];
-
-			cell.nebrs[2].ireg[HalfType::PLUS] = cell.nebrs[3].ireg[HalfType::MINUS] = vert->int_reg;
-			if (get_phi(*vert, cell.nebrs[2].cent) > get_phi(*vert, cell.nebrs[3].cent))
-			{	it->nebr[0] = 3;	it->nebr[1] = 2;	}
-			else
-			{	it->nebr[1] = 3;	it->nebr[0] = 2;	}
-
+			const auto& pt1 = pts[cell.verts[1]];
+			if (pt1.int_reg != nullptr)
+			{
+				auto& cells1_plus = pt1.int_reg->cells;
+				it = find(cells1_plus.begin(), cells1_plus.end(), cell.id);
+				assert(it != cells1_plus.end());
+				cell.nebrs[2].ireg[HalfType::PLUS] = cell.nebrs[3].ireg[HalfType::MINUS] = pt1.int_reg;
+				if (get_phi(pt1, cell.nebrs[2].cent) > get_phi(pt1, cell.nebrs[3].cent))
+				{	it->nebr[0] = 3;	it->nebr[1] = 2; }
+				else
+				{	it->nebr[1] = 3;	it->nebr[0] = 2; }
+			}
 			// 0 or 4
-			auto& cells1_minus = pts[cell.verts[0]].int_reg->cells;
-			it = find(cells1_minus.begin(), cells1_minus.end(), cell.id);
-			if (it != cells1_minus.end())
-				vert = &pts[cell.verts[0]];
-			else
-				vert = &pts[cell.verts[4]];
-
-			cell.nebrs[2].ireg[HalfType::MINUS] = cell.nebrs[5].ireg[HalfType::PLUS] = vert->int_reg;
-			if (get_phi(*vert, cell.nebrs[2].cent) > get_phi(*vert, cell.nebrs[5].cent))
-			{	it->nebr[0] = 5;	it->nebr[1] = 2;	}
-			else
-			{	it->nebr[1] = 5;	it->nebr[0] = 2;	}
-
+			const auto& pt2 = pts[cell.verts[0]];
+			if (pt2.int_reg != nullptr)
+			{
+				auto& cells1_minus = pt2.int_reg->cells;
+				it = find(cells1_minus.begin(), cells1_minus.end(), cell.id);
+				assert(it != cells1_minus.end());
+				cell.nebrs[2].ireg[HalfType::MINUS] = cell.nebrs[5].ireg[HalfType::PLUS] = pt2.int_reg;
+				if (get_phi(pt2, cell.nebrs[2].cent) > get_phi(pt2, cell.nebrs[5].cent))
+				{	it->nebr[0] = 5;	it->nebr[1] = 2; }
+				else
+				{	it->nebr[1] = 5;	it->nebr[0] = 2; }
+			}
 			// 2 or 6
-			auto& cells2_plus = pts[cell.verts[2]].int_reg->cells;
-			it = find(cells2_plus.begin(), cells2_plus.end(), cell.id);
-			if (it != cells2_plus.end())
-				vert = &pts[cell.verts[2]];
-			else
-				vert = &pts[cell.verts[6]];
-
-			cell.nebrs[3].ireg[HalfType::PLUS] = cell.nebrs[4].ireg[HalfType::MINUS] = vert->int_reg;
-			if (get_phi(*vert, cell.nebrs[3].cent) > get_phi(*vert, cell.nebrs[4].cent))
-			{	it->nebr[0] = 4;	it->nebr[1] = 3;	}
-			else
-			{	it->nebr[1] = 4;	it->nebr[0] = 3;	}
-
+			const auto& pt3 = pts[cell.verts[2]];
+			if (pt3.int_reg != nullptr)
+			{
+				auto& cells2_plus = pt3.int_reg->cells;
+				it = find(cells2_plus.begin(), cells2_plus.end(), cell.id);
+				assert(it != cells2_plus.end());
+				cell.nebrs[3].ireg[HalfType::PLUS] = cell.nebrs[4].ireg[HalfType::MINUS] = pt3.int_reg;
+				if (get_phi(pt3, cell.nebrs[3].cent) > get_phi(pt3, cell.nebrs[4].cent))
+				{	it->nebr[0] = 4;	it->nebr[1] = 3; }
+				else
+				{	it->nebr[1] = 4;	it->nebr[0] = 3; }
+			}
 			// 3 or 7
-			auto& cells3_plus = pts[cell.verts[3]].int_reg->cells;
-			it = find(cells3_plus.begin(), cells3_plus.end(), cell.id);
-			if (it != cells3_plus.end())
-				vert = &pts[cell.verts[3]];
-			else
-				vert = &pts[cell.verts[7]];
-
-			cell.nebrs[4].ireg[HalfType::PLUS] = cell.nebrs[5].ireg[HalfType::MINUS] = vert->int_reg;
-			if (get_phi(*vert, cell.nebrs[4].cent) > get_phi(*vert, cell.nebrs[5].cent))
-			{	it->nebr[0] = 5;	it->nebr[1] = 4;	}
-			else
-			{	it->nebr[1] = 5;	it->nebr[0] = 4;	}
+			const auto& pt4 = pts[cell.verts[3]];
+			if (pt4.int_reg != nullptr)
+			{
+				auto& cells3_plus = pt4.int_reg->cells;
+				it = find(cells3_plus.begin(), cells3_plus.end(), cell.id);
+				assert(it != cells3_plus.end());
+				cell.nebrs[4].ireg[HalfType::PLUS] = cell.nebrs[5].ireg[HalfType::MINUS] = pt4.int_reg;
+				if (get_phi(pt4, cell.nebrs[4].cent) > get_phi(pt4, cell.nebrs[5].cent))
+				{	it->nebr[0] = 5;	it->nebr[1] = 4; }
+				else
+				{	it->nebr[1] = 5;	it->nebr[0] = 4; }
+			}
 		}
 		else if (cell.type == elem::PRISM)
 		{
 			// 1 or 4
-			auto& cells1_plus = pts[cell.verts[1]].int_reg->cells;
-			it = find(cells1_plus.begin(), cells1_plus.end(), cell.id);
-			if (it != cells1_plus.end())
-				vert = &pts[cell.verts[1]];
-			else
-				vert = &pts[cell.verts[4]];
-
-			cell.nebrs[2].ireg[HalfType::PLUS] = cell.nebrs[3].ireg[HalfType::MINUS] = vert->int_reg;
-			if (get_phi(*vert, cell.nebrs[2].cent) > get_phi(*vert, cell.nebrs[3].cent))
-			{	it->nebr[0] = 3;	it->nebr[1] = 2;	}
-			else
-			{	it->nebr[1] = 3;	it->nebr[0] = 2;	}
-
+			const auto& pt1 = pts[cell.verts[1]];
+			if (pt1.int_reg != nullptr)
+			{
+				auto& cells1_plus = pt1.int_reg->cells;
+				it = find(cells1_plus.begin(), cells1_plus.end(), cell.id);
+				assert(it != cells1_plus.end());
+				cell.nebrs[2].ireg[HalfType::PLUS] = cell.nebrs[3].ireg[HalfType::MINUS] = pt1.int_reg;
+				if (get_phi(pt1, cell.nebrs[2].cent) > get_phi(pt1, cell.nebrs[3].cent))
+				{	it->nebr[0] = 3;	it->nebr[1] = 2; }
+				else
+				{	it->nebr[1] = 3;	it->nebr[0] = 2; }
+			}
 			// 0 or 3
-			auto& cells1_minus = pts[cell.verts[0]].int_reg->cells;
-			it = find(cells1_minus.begin(), cells1_minus.end(), cell.id);
-			if (it != cells1_minus.end())
-				vert = &pts[cell.verts[0]];
-			else
-				vert = &pts[cell.verts[3]];
-
-			cell.nebrs[2].ireg[HalfType::MINUS] = cell.nebrs[4].ireg[HalfType::PLUS] = vert->int_reg;
-			if (get_phi(*vert, cell.nebrs[2].cent) > get_phi(*vert, cell.nebrs[4].cent))
-			{	it->nebr[0] = 4;	it->nebr[1] = 2;	}
-			else
-			{	it->nebr[1] = 4;	it->nebr[0] = 2;	}
-			
+			const auto& pt2 = pts[cell.verts[0]];
+			if (pt2.int_reg != nullptr)
+			{
+				auto& cells1_minus = pt2.int_reg->cells;
+				it = find(cells1_minus.begin(), cells1_minus.end(), cell.id);
+				assert(it != cells1_minus.end());
+				cell.nebrs[2].ireg[HalfType::MINUS] = cell.nebrs[4].ireg[HalfType::PLUS] = pt2.int_reg;
+				if (get_phi(pt2, cell.nebrs[2].cent) > get_phi(pt2, cell.nebrs[4].cent))
+				{	it->nebr[0] = 4;	it->nebr[1] = 2; }
+				else
+				{	it->nebr[1] = 4;	it->nebr[0] = 2; }
+			}
 			// 2 or 5
-			auto& cells2_plus = pts[cell.verts[2]].int_reg->cells;
-			it = find(cells2_plus.begin(), cells2_plus.end(), cell.id);
-			if (it != cells2_plus.end())
-				vert = &pts[cell.verts[2]];
-			else
-				vert = &pts[cell.verts[5]];
-			cell.nebrs[3].ireg[HalfType::PLUS] = cell.nebrs[4].ireg[HalfType::MINUS] = vert->int_reg;
-			if (get_phi(*vert, cell.nebrs[3].cent) > get_phi(*vert, cell.nebrs[4].cent))
-			{	it->nebr[0] = 4;	it->nebr[1] = 3;	}
-			else
-			{	it->nebr[1] = 4;	it->nebr[0] = 3;	}
+			const auto& pt3 = pts[cell.verts[2]];
+			if (pt3.int_reg != nullptr)
+			{
+				auto& cells2_plus = pt3.int_reg->cells;
+				it = find(cells2_plus.begin(), cells2_plus.end(), cell.id);
+				assert(it != cells2_plus.end());
+				cell.nebrs[3].ireg[HalfType::PLUS] = cell.nebrs[4].ireg[HalfType::MINUS] = pt3.int_reg;
+				if (get_phi(pt3, cell.nebrs[3].cent) > get_phi(pt3, cell.nebrs[4].cent))
+				{	it->nebr[0] = 4;	it->nebr[1] = 3; }
+				else
+				{	it->nebr[1] = 4;	it->nebr[0] = 3; }
+			}
 		}	
 	}
 }
@@ -351,15 +345,27 @@ void Mesh::calc_transmissibilities()
 	typedef array<array<double, 2>, 2> Interface;
 	for (auto& pt : pts)
 	{
-		if (pt.type == point::INNER && fabs(pt.z - z_max) > EQUALITY_TOLERANCE)
+		if (pt.int_reg != nullptr)
 		{
-			auto& reg = *pt.int_reg;
+			const auto& reg = *pt.int_reg;
 			vector<Interface> omega(reg.cells.size());
-			for(const auto& cell_id : reg.cells)
+			for(int i = 0; i < reg.cells.size(); i++)
 			{
-				const auto& cell = cells[cell_id.cell];
-				const auto& nebr1 = cells[cell_id.cell].nebrs[cell_id.nebr[0]];
-				const auto& nebr2 = cells[cell_id.cell].nebrs[cell_id.nebr[1]];
+				const auto& cell_id1 = reg.cells[i];
+				const auto& cell1 = cells[cell_id1.cell];
+				const auto& nebr11 = cell1.nebrs[cell_id1.nebr[0]];
+				const auto& nebr12 = cell1.nebrs[cell_id1.nebr[1]];
+				const auto perm1 = get_XY_perm(cell1);
+
+				const auto& cell_id2 = (i < reg.cells.size() - 1 ? reg.cells[i + 1] : reg.cells[0]);
+				const auto& cell2 = cells[cell_id2.cell];
+				const auto& nebr21 = cell2.nebrs[cell_id2.nebr[0]];
+				const auto& nebr22 = cell2.nebrs[cell_id2.nebr[1]];
+				const auto perm2 = get_XY_perm(cell2);
+
+				const auto& nu11 = nebr11.nu;	const auto& nu12 = nebr12.nu;
+				const auto& nu21 = nebr21.nu;	const auto& nu22 = nebr22.nu;
+				omega[i][0][0] = (nebr12.n.x * perm1.kx * nu12.x + nebr12.n.y * perm1.ky * nu12.y) / cell1.T[cell_id1.nebr[1]+2];
 			}
 		}
 	}

@@ -79,7 +79,6 @@ protected:
 		u_prev.resize(varNum);
 		u_iter.resize(varNum);
 		u_next.resize(varNum);
-
 		Volume = mesh->Volume;
 	}
 	virtual void setProps(const propsType& props) = 0;
