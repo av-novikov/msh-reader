@@ -228,16 +228,6 @@ void Mesh::set_interaction_regions()
 	// Fill pointers to interaction regions in cells neighbours
 	using point::HalfType;
 	vector<RegCellId>::iterator it;
-	auto get_phi = [](const Point& vert, const Point& nebr_cent) -> double
-	{
-		double phi;
-		const double x = nebr_cent.x - vert.x;	const double y = nebr_cent.y - vert.y;
-		if (x < 0.0)
-			phi = M_PI + atan(y / x);
-		else
-			phi = (y < 0.0 ? 2.0 * M_PI + atan(y / x) : atan(y / x));
-		return phi;
-	};
 	for (int i = 0; i < inner_size; i++)
 	{
 		Cell& cell = cells[i];
@@ -251,7 +241,7 @@ void Mesh::set_interaction_regions()
 				it = find(cells1_plus.begin(), cells1_plus.end(), cell.id);
 				assert(it != cells1_plus.end());
 				cell.nebrs[2].ireg[HalfType::PLUS] = cell.nebrs[3].ireg[HalfType::MINUS] = pt1.int_reg;
-				if (get_phi(pt1, cell.nebrs[2].cent) > get_phi(pt1, cell.nebrs[3].cent))
+				if (vector_product(cell.nebrs[3].cent - pt1, cell.nebrs[2].cent - pt1).z > 0.0)
 				{	it->nebr[0] = 3;	it->nebr[1] = 2; }
 				else
 				{	it->nebr[1] = 3;	it->nebr[0] = 2; }
@@ -264,7 +254,7 @@ void Mesh::set_interaction_regions()
 				it = find(cells1_minus.begin(), cells1_minus.end(), cell.id);
 				assert(it != cells1_minus.end());
 				cell.nebrs[2].ireg[HalfType::MINUS] = cell.nebrs[5].ireg[HalfType::PLUS] = pt2.int_reg;
-				if (get_phi(pt2, cell.nebrs[2].cent) > get_phi(pt2, cell.nebrs[5].cent))
+				if (vector_product(cell.nebrs[5].cent - pt2, cell.nebrs[2].cent - pt2).z > 0.0)
 				{	it->nebr[0] = 5;	it->nebr[1] = 2; }
 				else
 				{	it->nebr[1] = 5;	it->nebr[0] = 2; }
@@ -277,7 +267,7 @@ void Mesh::set_interaction_regions()
 				it = find(cells2_plus.begin(), cells2_plus.end(), cell.id);
 				assert(it != cells2_plus.end());
 				cell.nebrs[3].ireg[HalfType::PLUS] = cell.nebrs[4].ireg[HalfType::MINUS] = pt3.int_reg;
-				if (get_phi(pt3, cell.nebrs[3].cent) > get_phi(pt3, cell.nebrs[4].cent))
+				if (vector_product(cell.nebrs[4].cent - pt3, cell.nebrs[3].cent - pt3).z > 0.0)
 				{	it->nebr[0] = 4;	it->nebr[1] = 3; }
 				else
 				{	it->nebr[1] = 4;	it->nebr[0] = 3; }
@@ -290,7 +280,7 @@ void Mesh::set_interaction_regions()
 				it = find(cells3_plus.begin(), cells3_plus.end(), cell.id);
 				assert(it != cells3_plus.end());
 				cell.nebrs[4].ireg[HalfType::PLUS] = cell.nebrs[5].ireg[HalfType::MINUS] = pt4.int_reg;
-				if (get_phi(pt4, cell.nebrs[4].cent) > get_phi(pt4, cell.nebrs[5].cent))
+				if (vector_product(cell.nebrs[5].cent - pt4, cell.nebrs[4].cent - pt4).z > 0.0)
 				{	it->nebr[0] = 5;	it->nebr[1] = 4; }
 				else
 				{	it->nebr[1] = 5;	it->nebr[0] = 4; }
@@ -306,7 +296,7 @@ void Mesh::set_interaction_regions()
 				it = find(cells1_plus.begin(), cells1_plus.end(), cell.id);
 				assert(it != cells1_plus.end());
 				cell.nebrs[2].ireg[HalfType::PLUS] = cell.nebrs[3].ireg[HalfType::MINUS] = pt1.int_reg;
-				if (get_phi(pt1, cell.nebrs[2].cent) > get_phi(pt1, cell.nebrs[3].cent))
+				if (vector_product(cell.nebrs[3].cent - pt1, cell.nebrs[2].cent - pt1).z > 0.0)
 				{	it->nebr[0] = 3;	it->nebr[1] = 2; }
 				else
 				{	it->nebr[1] = 3;	it->nebr[0] = 2; }
@@ -319,7 +309,7 @@ void Mesh::set_interaction_regions()
 				it = find(cells1_minus.begin(), cells1_minus.end(), cell.id);
 				assert(it != cells1_minus.end());
 				cell.nebrs[2].ireg[HalfType::MINUS] = cell.nebrs[4].ireg[HalfType::PLUS] = pt2.int_reg;
-				if (get_phi(pt2, cell.nebrs[2].cent) > get_phi(pt2, cell.nebrs[4].cent))
+				if (vector_product(cell.nebrs[4].cent - pt2, cell.nebrs[2].cent - pt2).z > 0.0)
 				{	it->nebr[0] = 4;	it->nebr[1] = 2; }
 				else
 				{	it->nebr[1] = 4;	it->nebr[0] = 2; }
@@ -332,7 +322,7 @@ void Mesh::set_interaction_regions()
 				it = find(cells2_plus.begin(), cells2_plus.end(), cell.id);
 				assert(it != cells2_plus.end());
 				cell.nebrs[3].ireg[HalfType::PLUS] = cell.nebrs[4].ireg[HalfType::MINUS] = pt3.int_reg;
-				if (get_phi(pt3, cell.nebrs[3].cent) > get_phi(pt3, cell.nebrs[4].cent))
+				if (vector_product(cell.nebrs[4].cent - pt3, cell.nebrs[3].cent - pt3).z > 0.0)
 				{	it->nebr[0] = 4;	it->nebr[1] = 3; }
 				else
 				{	it->nebr[1] = 4;	it->nebr[0] = 3; }
