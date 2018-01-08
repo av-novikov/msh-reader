@@ -27,6 +27,8 @@ namespace point
 	struct Interaction
 	{
 		std::vector<RegCellId> cells;
+		std::vector<int> row_offset, colms;
+		std::vector<double> trans;
 
 		Interaction() {};
 		Interaction(const std::vector<int>& _cells)
@@ -38,6 +40,9 @@ namespace point
 		Interaction& operator=(const Interaction& other)
 		{
 			cells = other.cells;
+			row_offset = other.row_offset;
+			colms = other.colms;
+			trans = other.trans;
 			return *this;
 		};
 	};

@@ -26,7 +26,7 @@ namespace oil
 
 		grid::Mesh::Perm_XY getPerm_XY(const Cell& cell) 
 		{
-			return{ 0.0, 0.0 };
+			return{ props_sk[0].kx, props_sk[0].ky };
 		};
 		inline const double getKz(const Cell& cell) const
 		{

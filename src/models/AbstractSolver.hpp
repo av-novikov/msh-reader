@@ -124,8 +124,8 @@ public:
 		}
 
 		elemNum = counter;*/
-		for (int i = 0; i < var_size * model->cellsNum; i++)
-			ind_rhs[i] = i;
+		/*for (int i = 0; i < var_size * model->cellsNum; i++)
+			ind_rhs[i] = i;*/
 	}
 	virtual void start();
 };

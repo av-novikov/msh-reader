@@ -22,18 +22,17 @@ public:
 
 	void load(const propsType& props, const std::string nebrFileName)
 	{
+		paralution::init_paralution();
 		model = std::make_shared<Model>();
 		model->load(props, nebrFileName);
 		model->setSnapshotter(model.get());
 		model->snapshot_all(0);
 
-		paralution::init_paralution();
-
 		method = std::make_shared<Method>(model.get());
 	}
 	void start()
 	{
-		method->start();
+		//method->start();
 	}
 };
 

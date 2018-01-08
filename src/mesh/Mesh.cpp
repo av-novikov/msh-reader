@@ -9,14 +9,13 @@
 using namespace grid;
 using namespace point;
 using namespace std;
+using namespace paralution;
 
 Mesh::Mesh()
 {
 }
 Mesh::~Mesh()
 {
-	for (auto& pt : pts)
-		delete pt.int_reg;
 }
 void Mesh::process_geometry()
 {
@@ -69,29 +68,29 @@ void Mesh::set_geom_props()
 			el.nebrs[2].L = distance(el.cent, el.nebrs[2].cent);
 			el.nebrs[2].n = vector_product(pts[el.verts[1]] - pts[el.verts[0]], pts[el.verts[4]] - pts[el.verts[0]]);
 			el.nebrs[2].nu = { (el.nebrs[2].cent - el.cent).y, -(el.nebrs[2].cent - el.cent).x, 0.0 };
-			el.T[0] = 2.0 * square(el.cent, el.nebrs[2].cent, el.nebrs[3].cent);
 
 			el.nebrs[3].S = square(pts[el.verts[1]], pts[el.verts[2]], pts[el.verts[6]], pts[el.verts[5]]);
 			el.nebrs[3].cent = (pts[el.verts[1]] + pts[el.verts[2]] + pts[el.verts[6]] + pts[el.verts[5]]) / 4.0;
 			el.nebrs[3].L = distance(el.cent, el.nebrs[3].cent);
 			el.nebrs[3].n = vector_product(pts[el.verts[2]] - pts[el.verts[1]], pts[el.verts[5]] - pts[el.verts[1]]);
 			el.nebrs[3].nu = { (el.nebrs[3].cent - el.cent).y, -(el.nebrs[3].cent - el.cent).x, 0.0 };
-			el.T[1] = 2.0 * square(el.cent, el.nebrs[3].cent, el.nebrs[4].cent);
 
 			el.nebrs[4].S = square(pts[el.verts[2]], pts[el.verts[3]], pts[el.verts[7]], pts[el.verts[6]]);
 			el.nebrs[4].cent = (pts[el.verts[2]] + pts[el.verts[3]] + pts[el.verts[7]] + pts[el.verts[6]]) / 4.0;
 			el.nebrs[4].L = distance(el.cent, el.nebrs[4].cent);
 			el.nebrs[4].n = vector_product(pts[el.verts[3]] - pts[el.verts[2]], pts[el.verts[6]] - pts[el.verts[2]]);
 			el.nebrs[4].nu = { (el.nebrs[4].cent - el.cent).y, -(el.nebrs[4].cent - el.cent).x, 0.0 };
-			el.T[2] = 2.0 * square(el.cent, el.nebrs[4].cent, el.nebrs[5].cent);
 
 			el.nebrs[5].S = square(pts[el.verts[3]], pts[el.verts[0]], pts[el.verts[4]], pts[el.verts[7]]);
 			el.nebrs[5].cent = (pts[el.verts[3]] + pts[el.verts[0]] + pts[el.verts[4]] + pts[el.verts[7]]) / 4.0;
 			el.nebrs[5].L = distance(el.cent, el.nebrs[5].cent);
 			el.nebrs[5].n = vector_product(pts[el.verts[0]] - pts[el.verts[3]], pts[el.verts[7]] - pts[el.verts[3]]);
 			el.nebrs[5].nu = { (el.nebrs[5].cent - el.cent).y, -(el.nebrs[5].cent - el.cent).x, 0.0 };
-			el.T[3] = 2.0 * square(el.cent, el.nebrs[5].cent, el.nebrs[2].cent);
 
+			el.T[0] = 2.0 * square(el.cent, el.nebrs[2].cent, el.nebrs[3].cent);
+			el.T[1] = 2.0 * square(el.cent, el.nebrs[3].cent, el.nebrs[4].cent);
+			el.T[2] = 2.0 * square(el.cent, el.nebrs[4].cent, el.nebrs[5].cent);
+			el.T[3] = 2.0 * square(el.cent, el.nebrs[5].cent, el.nebrs[2].cent);
 			el.V = fabs(pts[el.verts[0]].z - pts[el.verts[4]].z) * (el.nebrs[0].S + el.nebrs[1].S) / 2.0;
 		}
 		else if (el.type == elem::PRISM)
@@ -115,22 +114,23 @@ void Mesh::set_geom_props()
 			el.nebrs[2].L = distance(el.cent, el.nebrs[2].cent);
 			el.nebrs[2].n = vector_product(pts[el.verts[1]] - pts[el.verts[0]], pts[el.verts[3]] - pts[el.verts[0]]) / 2.0;
 			el.nebrs[2].nu = { (el.nebrs[2].cent - el.cent).y, -(el.nebrs[2].cent - el.cent).x, 0.0 };
-			el.T[0] = 2.0 * square(el.cent, el.nebrs[2].cent, el.nebrs[3].cent);
+
 
 			el.nebrs[3].S = square(pts[el.verts[1]], pts[el.verts[2]], pts[el.verts[5]], pts[el.verts[4]]);
 			el.nebrs[3].cent = (pts[el.verts[1]] + pts[el.verts[2]] + pts[el.verts[5]] + pts[el.verts[4]]) / 4.0;
 			el.nebrs[3].L = distance(el.cent, el.nebrs[3].cent);
 			el.nebrs[3].n = vector_product(pts[el.verts[2]] - pts[el.verts[1]], pts[el.verts[4]] - pts[el.verts[1]]) / 2.0;
 			el.nebrs[3].nu = { (el.nebrs[3].cent - el.cent).y, -(el.nebrs[3].cent - el.cent).x, 0.0 };
-			el.T[1] = 2.0 * square(el.cent, el.nebrs[3].cent, el.nebrs[4].cent);
 
 			el.nebrs[4].S = square(pts[el.verts[2]], pts[el.verts[0]], pts[el.verts[3]], pts[el.verts[5]]);
 			el.nebrs[4].cent = (pts[el.verts[2]] + pts[el.verts[0]] + pts[el.verts[3]] + pts[el.verts[5]]) / 4.0;
 			el.nebrs[4].L = distance(el.cent, el.nebrs[4].cent);
 			el.nebrs[4].n = vector_product(pts[el.verts[0]] - pts[el.verts[2]], pts[el.verts[5]] - pts[el.verts[2]]) / 2.0;
 			el.nebrs[4].nu = { (el.nebrs[4].cent - el.cent).y, -(el.nebrs[4].cent - el.cent).x, 0.0 };
-			el.T[2] = 2.0 * square(el.cent, el.nebrs[4].cent, el.nebrs[2].cent);
 
+			el.T[0] = 2.0 * square(el.cent, el.nebrs[2].cent, el.nebrs[3].cent);
+			el.T[1] = 2.0 * square(el.cent, el.nebrs[3].cent, el.nebrs[4].cent);
+			el.T[2] = 2.0 * square(el.cent, el.nebrs[4].cent, el.nebrs[2].cent);
 			el.V = fabs(pts[el.verts[0]].z - pts[el.verts[3]].z) * (el.nebrs[0].S + el.nebrs[1].S) / 2.0;
 		}
 		else if (el.type == elem::BORDER_TRI)
@@ -333,11 +333,28 @@ void Mesh::set_interaction_regions()
 void Mesh::calc_transmissibilities()
 {
 	typedef array<array<double, 2>, 2> Interface;
+	
+
+	double sum, abs_sum, buf;
+	int ind_col;
+	LocalMatrix<double> a, b, c, d, tmp, t;
+	const int MAX_REG_CELLS = 30;
+	const double REL_TOL = 1.E-10;
+	double buf_a [MAX_REG_CELLS * MAX_REG_CELLS], buf_b[MAX_REG_CELLS * MAX_REG_CELLS], buf_c[MAX_REG_CELLS * MAX_REG_CELLS], buf_d[MAX_REG_CELLS * MAX_REG_CELLS];
+	int ind_ai [3 * MAX_REG_CELLS], ind_aj [3 * MAX_REG_CELLS], ind_bi[3 * MAX_REG_CELLS], ind_bj[3 * MAX_REG_CELLS], 
+			ind_ci[3 * MAX_REG_CELLS], ind_cj[3 * MAX_REG_CELLS], ind_di[3 * MAX_REG_CELLS], ind_dj[3 * MAX_REG_CELLS];
+	int counter_a, counter_b, counter_c, counter_d, i_plus, i_minus;
+
 	for (auto& pt : pts)
 	{
 		if (pt.int_reg != nullptr)
 		{
-			const auto& reg = *pt.int_reg;
+			auto& reg = *pt.int_reg;
+
+			reg.row_offset.resize(reg.cells.size() + 1);
+			reg.colms.resize(reg.cells.size() * reg.cells.size());
+			reg.trans.resize(reg.cells.size() * reg.cells.size());
+
 			vector<Interface> omega(reg.cells.size());
 			for(int i = 0; i < reg.cells.size(); i++)
 			{
@@ -355,7 +372,62 @@ void Mesh::calc_transmissibilities()
 
 				const auto& nu11 = nebr11.nu;	const auto& nu12 = nebr12.nu;
 				const auto& nu21 = nebr21.nu;	const auto& nu22 = nebr22.nu;
-				omega[i][0][0] = (nebr12.n.x * perm1.kx * nu12.x + nebr12.n.y * perm1.ky * nu12.y) / cell1.T[cell_id1.nebr[1]+2];
+				omega[i][0][0] = (nebr12.n.x * perm1.kx * nu12.x + nebr12.n.y * perm1.ky * nu12.y) / cell1.T[(int)(cell_id1.nebr[1]) - 2];
+				omega[i][0][1] = (nebr12.n.x * perm1.kx * nu11.x + nebr12.n.y * perm1.ky * nu11.y) / cell1.T[(int)(cell_id1.nebr[1]) - 2];
+
+				omega[i][1][0] = (nebr21.n.x * perm2.kx * nu22.x + nebr21.n.y * perm2.ky * nu22.y) / cell2.T[(int)(cell_id2.nebr[0]) - 2];
+				omega[i][1][1] = (nebr21.n.x * perm2.kx * nu21.x + nebr21.n.y * perm2.ky * nu21.y) / cell2.T[(int)(cell_id2.nebr[0]) - 2];
+			}
+
+			counter_a = counter_b = counter_c = counter_d = 0;
+			for (int i = 0; i < reg.cells.size(); i++)
+			{
+				i_plus = (i + 1 ? i < reg.cells.size() - 1 : 0);
+				i_minus = (i - 1 ? i > 0 : reg.cells.size() - 1);
+				// A
+				ind_ai[counter_a] = i;	ind_aj[counter_a] = i_minus;	buf_a[counter_a++] = omega[i][0][1];
+				ind_ai[counter_a] = i;	ind_aj[counter_a] = i;			buf_a[counter_a++] = omega[i][0][0] - omega[i][1][1];
+				ind_ai[counter_a] = i;	ind_aj[counter_a] = i_plus;		buf_a[counter_a++] = -omega[i][1][0];
+				// B
+				ind_bi[counter_b] = i;	ind_bj[counter_b] = i;			buf_b[counter_b++] = omega[i][0][0] + omega[i][0][1];
+				ind_bi[counter_b] = i;	ind_bj[counter_b] = i_plus;		buf_b[counter_b++] = -omega[i][1][0] - omega[i][1][1];
+				// C
+				ind_ci[counter_c] = i;	ind_cj[counter_c] = i;			buf_c[counter_c++] = omega[i][0][0];
+				ind_ci[counter_c] = i;	ind_cj[counter_c] = i_minus;	buf_c[counter_c++] = omega[i][0][1];
+				// D
+				ind_di[counter_d] = i;	ind_dj[counter_d] = i;			buf_d[counter_d++] = omega[i][0][0] + omega[i][0][1];
+			}
+			a.Assemble(ind_ai, ind_aj, buf_a, counter_a, "A", reg.cells.size(), reg.cells.size());
+			b.Assemble(ind_bi, ind_bj, buf_b, counter_b, "B", reg.cells.size(), reg.cells.size());
+			c.Assemble(ind_ci, ind_cj, buf_c, counter_c, "C", reg.cells.size(), reg.cells.size());
+			d.Assemble(ind_di, ind_dj, buf_d, counter_d, "D", reg.cells.size(), reg.cells.size());
+
+			a.Invert();
+			tmp.MatrixMult(c , a);
+			t.MatrixMult(tmp, b);
+			t.MatrixAdd(d, 1.0, -1.0, true);
+			t.CopyToCSR(reg.row_offset.data(), reg.colms.data(), reg.trans.data());
+			a.Clear();	b.Clear();	c.Clear();	d.Clear();	tmp.Clear();	t.Clear();
+
+			// Sum == 0
+			for (int i = 0; i < reg.cells.size(); i++)
+			{
+				abs_sum = sum = 0.0;	ind_col = 0;
+				while (ind_col + reg.row_offset[i] < reg.row_offset[i + 1])
+				{
+					buf = reg.trans[ind_col + reg.row_offset[i]];
+					sum += buf;		abs_sum += fabs(buf);
+					ind_col++;
+				}
+				ind_col = 0;
+				while (ind_col + reg.row_offset[i] < reg.row_offset[i + 1])
+				{
+					buf = reg.trans[ind_col + reg.row_offset[i]];
+					if (fabs(reg.trans[ind_col + reg.row_offset[i]]) / abs_sum < 10.0 * REL_TOL)
+						reg.trans[ind_col + reg.row_offset[i]] = 0.0;
+					ind_col++;
+				}
+				assert(fabs(sum) / abs_sum < REL_TOL);
 			}
 		}
 	}

@@ -13,7 +13,7 @@ using std::setprecision;
 
 OilSolver::OilSolver(Model* _model) : AbstractSolver<Model>(_model)
 {
-	y = new double[var_size * size];
+/*	y = new double[var_size * size];
 
 	const int strNum = var_size * model->cellsNum;
 	ind_i = new int[grid::stencil * var_size * strNum];
@@ -23,24 +23,24 @@ OilSolver::OilSolver(Model* _model) : AbstractSolver<Model>(_model)
 	ind_rhs = new int[strNum];
 	rhs = new double[strNum];
 
-	options[0] = 0;          /* sparsity pattern by index domains (default) */
-	options[1] = 0;          /*                         safe mode (default) */
-	options[2] = 0;          /*              not required if options[0] = 0 */
-	options[3] = 0;          /*                column compression (default) */
+	//options[0] = 0;          /* sparsity pattern by index domains (default) */
+	//options[1] = 0;          /*                         safe mode (default) */
+	//options[2] = 0;          /*              not required if options[0] = 0 */
+	//options[3] = 0;          /*                column compression (default) */
 
 	plot_P.open("snaps/P.dat", ofstream::out);
 	plot_Q.open("snaps/Q.dat", ofstream::out);
 };
 OilSolver::~OilSolver()
 {
-	delete[] y;
+	//delete[] y;
 	/*for (int i = 0; i < Model::var_size * size; i++)
 		delete[] jac[i];
 	delete[] jac;*/
 
-	delete[] ind_i, ind_j, ind_rhs;
-	delete[] cols;
-	delete[] a, rhs;
+	//delete[] ind_i, ind_j, ind_rhs;
+	//delete[] cols;
+	//delete[] a, rhs;
 
 	plot_P.close();
 	plot_Q.close();

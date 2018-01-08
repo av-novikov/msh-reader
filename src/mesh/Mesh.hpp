@@ -8,6 +8,8 @@
 #include <initializer_list>
 #include <functional>
 
+#include "paralution.hpp"
+
 namespace mshreader
 {
 	class MshReader;
