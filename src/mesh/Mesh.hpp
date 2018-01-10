@@ -22,7 +22,7 @@ namespace snapshotter
 
 namespace grid
 {
-	static const int stencil = -11;
+	static const int stencil = 11;
 	const int MAX_REG_CELLS = 30;
 	const double REL_TOL = 1.E-10;
 

@@ -400,6 +400,38 @@ void Mesh::set_interaction_regions()
 			}
 		}	
 	}
+	// Cell indices in trans arrays for neighbours 
+	for (int i = 0; i < inner_size; i++)
+	{
+		Cell& cell = cells[i];
+		if (cell.type != elem::BORDER_HEX)
+		{
+			for (int j = 2; j < cell.nebrs_num; j++)
+			{
+				auto& nebr = cell.nebrs[j];
+				const auto& ireg_cells1 = nebr.ireg[MINUS]->cells;
+				for (int k = 0; k < ireg_cells1.size(); k++)
+				{
+					if (ireg_cells1[k].cell == cell.id)
+					{
+						nebr.ireg_id[MINUS] = k;
+						break;
+					}
+				}
+				assert(nebr.ireg_id[MINUS] != elem::EMPTY_PLACE);
+				const auto& ireg_cells2 = nebr.ireg[PLUS]->cells;
+				for (int k = 0; k < ireg_cells2.size(); k++)
+				{
+					if (ireg_cells2[k].cell == cell.id)
+					{
+						nebr.ireg_id[PLUS] = k;
+						break;
+					}
+				}
+				assert(nebr.ireg_id[PLUS] != elem::EMPTY_PLACE);
+			}
+		}
+	}
 }
 void Mesh::calc_transmissibilities()
 {

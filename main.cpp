@@ -13,9 +13,10 @@ oil::Properties* getProps()
 	oil::Properties* props = new oil::Properties();
 	props->timePeriods.push_back(86400.0 * 20.0);
 
-	props->leftBoundIsRate = true;
+	props->leftBoundIsRate = false;
 	props->rightBoundIsPres = true;
-	props->rates.push_back(100.0);
+	//props->rates.push_back(100.0);
+	props->pwf.push_back(200.0 * 100000.0);
 	props->ht = 1000.0;
 	props->ht_min = 1000.0;
 	props->ht_max = 100000.0;

@@ -3,6 +3,7 @@
 
 using namespace oil;
 using namespace std;
+using namespace point;
 
 Oil::Oil()
 {
@@ -111,11 +112,11 @@ void Oil::setInitialState()
 }
 void Oil::setPeriod(const int period)
 {
-	if (leftBoundIsRate)
+	/*if (leftBoundIsRate)
 	{
 		Q_sum = rate[period];
 
-		/*if (period == 0 || rate[period - 1] < EQUALITY_TOLERANCE) {
+		if (period == 0 || rate[period - 1] < EQUALITY_TOLERANCE) {
 			map<int, double>::iterator it;
 			for (it = Qcell.begin(); it != Qcell.end(); ++it)
 				it->second = Q_sum * cells[it->first].hz / height_perf;
@@ -124,9 +125,9 @@ void Oil::setPeriod(const int period)
 			map<int, double>::iterator it;
 			for (it = Qcell.begin(); it != Qcell.end(); ++it)
 				it->second = it->second * Q_sum / rate[period - 1];
-		}*/
+		}
 	}
-	else
+	else*/
 	{
 		Pwf = pwf[period];
 		Q_sum = 0.0;
@@ -144,44 +145,51 @@ void Oil::setTrans()
 
 adouble Oil::solveInner(const Cell& cell)
 {
+	assert(cell.type == elem::HEX || cell.type == elem::PRISM);
 	const auto& cur = x[cell.id];
 	const auto prev = (*this)[cell.id].u_prev;
 
+	adouble tmp;
 	adouble H = props_sk[0].getPoro(cur.p) * props_oil.getDensity(cur.p) - props_sk[0].getPoro(prev.p) * props_oil.getDensity(prev.p);
 
-	/*int BETA;
-	double trans;
-	// Vertical cell
-	BETA = 0;
-	const Cell& beta = cells[cell.nebrs[BETA].nebr.cell];
-	trans = cell.nebrs[BETA].S * getKz(cell) * get()
-	H += ht / cell.V * 
-	for (char i = 0; i < cell.nebrs_num - 2; i++)
+	// Bottom
+	const auto& nebr_bot = cell.nebrs[0];
+	H += ht / cell.V * getVertTrans(cell, 0, mesh->cells[nebr_bot.nebr.cell], nebr_bot.nebr.nebr) *
+		linearInterp(nebr_bot,	props_oil.getDensity(x[nebr_bot.nearest_cells[0]].p) / props_oil.getViscosity(x[nebr_bot.nearest_cells[0]].p),
+								props_oil.getDensity(x[nebr_bot.nearest_cells[1]].p) / props_oil.getViscosity(x[nebr_bot.nearest_cells[1]].p),
+								props_oil.getDensity(x[nebr_bot.nearest_cells[2]].p) / props_oil.getViscosity(x[nebr_bot.nearest_cells[2]].p)) * (cur.p - x[nebr_bot.nebr.cell].p);
+	// Top
+	const auto& nebr_top = cell.nebrs[1];
+	H += ht / cell.V * getVertTrans(cell, 1, mesh->cells[nebr_top.nebr.cell], nebr_top.nebr.nebr) *
+		linearInterp(nebr_top,	props_oil.getDensity(x[nebr_top.nearest_cells[0]].p) / props_oil.getViscosity(x[nebr_top.nearest_cells[0]].p),
+								props_oil.getDensity(x[nebr_top.nearest_cells[1]].p) / props_oil.getViscosity(x[nebr_top.nearest_cells[1]].p),
+								props_oil.getDensity(x[nebr_top.nearest_cells[2]].p) / props_oil.getViscosity(x[nebr_top.nearest_cells[2]].p)) * (cur.p - x[nebr_top.nebr.cell].p);
+	// Laterals
+	for (int i = 2; i < cell.nebrs_num; i++)
 	{
-
+		const auto& nebr = cell.nebrs[i];
+		const Cell& beta = mesh->cells[nebr.nebr.cell];
+		tmp = ht / cell.V * linearInterp(nebr, props_oil.getDensity(x[nebr.nearest_cells[0]].p) / props_oil.getViscosity(x[nebr.nearest_cells[0]].p),
+			props_oil.getDensity(x[nebr.nearest_cells[1]].p) / props_oil.getViscosity(x[nebr.nearest_cells[1]].p),
+			props_oil.getDensity(x[nebr.nearest_cells[2]].p) / props_oil.getViscosity(x[nebr.nearest_cells[2]].p));
+		const auto& ireg1 = nebr.ireg[PLUS];
+		for (int j = 0; j < ireg1->trans.size(); j++)
+			H += tmp * ireg1->trans[nebr.ireg_id[PLUS]][j] * x[ireg1->cells[j].cell].p;
+		const auto& ireg2 = nebr.ireg[MINUS];
+		for (int j = 0; j < ireg2->trans.size(); j++)
+			H += tmp * ireg2->trans[nebr.ireg_id[MINUS]][j] * x[ireg2->cells[j].cell].p;
 	}
-	for (int i = 0; i < 3; i++)
-	{
-		const int nebr_idx = cell.nebr[i];
-		const auto& beta = mesh->cells[nebr_idx];
-		const auto& nebr = x[nebr_idx];
-
-		H += ht / cell.V * getTrans(cell, i, beta) *
-			linearAppr(props_oil.getDensity(cur.p) / props_oil.getViscosity(cur.p), cell.dist[i],
-				props_oil.getDensity(nebr.p) / props_oil.getViscosity(nebr.p), getDistance(beta, cell)) *
-				(cur.p - nebr.p);
-	}*/
 	return H;
 }
 adouble Oil::solveBorder(const Cell& cell)
 {
+	assert(cell.type == elem::BORDER_HEX);
 	const auto& cur = x[cell.id];
 	const auto& nebr = x[cell.nebrs[0].nebr.cell];
-	adouble H;
-	adouble rightIsPres = rightBoundIsPres;
-	condassign(H, rightIsPres, (cur.p - (adouble)(props_sk[0].p_out)) / P_dim, (cur.p - nebr.p) / P_dim);
-
-	return H;
+	//adouble H;
+	//adouble rightIsPres = rightBoundIsPres;
+	//condassign(H, rightIsPres, (cur.p - (adouble)(props_sk[0].p_out)) / P_dim, (cur.p - nebr.p) / P_dim);
+	return cur.p - (adouble)(props_sk[0].p_out);
 }
 adouble Oil::solveFrac(const Cell& cell)
 {

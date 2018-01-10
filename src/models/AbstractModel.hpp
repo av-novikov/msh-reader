@@ -89,11 +89,6 @@ protected:
 	};
 	virtual void setInitialState() = 0;
 
-	adouble linearAppr(const adouble a1, const double r1, const adouble a2, const double r2)
-	{
-		return (a1 * r2 + a2 * r1) / (r1 + r2);
-	}
-
 	static const int var_size;
 public:
 	AbstractModel() 

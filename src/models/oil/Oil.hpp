@@ -1,6 +1,8 @@
 #ifndef OIL_HPP_
 #define OIL_HPP_
 
+#include <functional>
+
 #include "src/models/Variables.hpp"
 #include "src/models/AbstractModel.hpp"
 #include "src/models/Oil/Properties.hpp"
@@ -32,12 +34,29 @@ namespace oil
 		{
 			return props_sk[0].kz;
 		};
-
-		inline adouble linearInterp(const Cell& cell, const int nebr_id, adouble f0, adouble f1, adouble f2)
+		inline const double getVertTrans(const Cell& cell1, const int nebr_id1, const Cell& cell2, const int nebr_id2)
 		{
-			const auto& nebr = cell.nebrs[nebr_id];
+			double k1 = props_sk[0].kz;
+			double k2 = props_sk[0].kz;
+			const auto& nebr1 = cell1.nebrs[nebr_id1];
+			const auto& nebr2 = cell2.nebrs[nebr_id2];
+			assert(fabs(nebr1.S - nebr2.S) < EQUALITY_TOLERANCE);
+
+			if (k1 == 0.0 && k2 == 0.0)
+				return 0.0;
+
+			return k1 * k2 * nebr1.S / (k1 * nebr2.L + k2 * nebr1.L);
+		};
+		inline adouble linearInterp(const elem::Nebr& nebr, adouble f0, adouble f1, adouble f2)
+		{
 			return f0 * nebr.nearest_coeff[0] + f1 * nebr.nearest_coeff[1] + f2 * nebr.nearest_coeff[2];
-		}
+		};
+		/*inline adouble linearInterp(const elem::Nebr& nebr, std::function<adouble(adouble tmp)> foo)
+		{
+			return	foo(x[nebr.nearest_cells[0]].p) * nebr.nearest_coeff[0] + 
+					foo(x[nebr.nearest_cells[1]].p) * nebr.nearest_coeff[1] + 
+					foo(x[nebr.nearest_cells[2]].p) * nebr.nearest_coeff[2];
+		}*/
 
 		/*double getTrans(const Cell& cell1, const int idx, const Cell& cell2) const
 		{

@@ -12,6 +12,8 @@ namespace elem
 	static const int MAX_INTERFACES_STENCIL = 6;
 	static const int NEARESET_POINT_NUMBER = 3;
 
+	static const int EMPTY_PLACE = 59;
+
 	enum EType { BORDER_TRI, BORDER_QUAD, FRAC_QUAD, PRISM, HEX, BORDER_HEX };
 	inline const char num_of_verts(const EType type)
 	{
@@ -43,9 +45,16 @@ namespace elem
 		double L;
 		point::Point cent;
 		point::Interaction* ireg [2];
+		char ireg_id[2];
 		point::Point n, nu;
 		int nearest_cells[NEARESET_POINT_NUMBER];
 		double nearest_coeff[NEARESET_POINT_NUMBER];
+
+		Nebr()
+		{
+			ireg_id[0] = EMPTY_PLACE;
+			ireg_id[1] = EMPTY_PLACE;
+		};
 	};
 
 	class Element

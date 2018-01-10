@@ -13,12 +13,12 @@ using std::setprecision;
 
 OilSolver::OilSolver(Model* _model) : AbstractSolver<Model>(_model)
 {
-/*	y = new double[var_size * size];
-
 	const int strNum = var_size * model->cellsNum;
+
+	y = new double[strNum];
 	ind_i = new int[grid::stencil * var_size * strNum];
 	ind_j = new int[grid::stencil * var_size * strNum];
-	cols = new int[strNum];
+	//cols = new int[strNum];
 	a = new double[grid::stencil * var_size * strNum];
 	ind_rhs = new int[strNum];
 	rhs = new double[strNum];
@@ -33,14 +33,14 @@ OilSolver::OilSolver(Model* _model) : AbstractSolver<Model>(_model)
 };
 OilSolver::~OilSolver()
 {
-	//delete[] y;
-	/*for (int i = 0; i < Model::var_size * size; i++)
-		delete[] jac[i];
-	delete[] jac;*/
+	delete[] y;
+	//for (int i = 0; i < Model::var_size * size; i++)
+	//	delete[] jac[i];
+	//delete[] jac;
 
-	//delete[] ind_i, ind_j, ind_rhs;
+	delete[] ind_i, ind_j, ind_rhs;
 	//delete[] cols;
-	//delete[] a, rhs;
+	delete[] a, rhs;
 
 	plot_P.close();
 	plot_Q.close();
