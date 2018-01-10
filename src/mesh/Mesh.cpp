@@ -24,6 +24,7 @@ void Mesh::process_geometry()
 	count_types();
 
 	set_interaction_regions(); 
+	set_nearest();
 }
 void Mesh::count_types()
 {
@@ -37,6 +38,47 @@ void Mesh::count_types()
 			el.type == elem::PRISM)							inner_size++;
 		else if (el.type == elem::FRAC_QUAD)				frac_size++;
 		else												border_size++;
+	}
+}
+void Mesh::set_nearest()
+{
+	double dist = 0.0;
+
+	// Find nearest cell centers for all inner faces
+	for (int i = 0; i < inner_size; i++)
+	{
+		auto& cell = cells[i];
+		assert(cell.type == elem::HEX || cell.type == elem::PRISM);
+		
+		for (int j = 2; j < cell.nebrs_num; j++)
+		{
+			auto& nebr = cell.nebrs[j];
+			nebr.nearest_cells[0] = cell.id;
+			nebr.nearest_dists[0] = point::distance(nebr.cent, cells[nebr.nearest_cells[0]].cent);
+			nebr.nearest_cells[1] = nebr.nebr.cell;
+			nebr.nearest_dists[1] = point::distance(nebr.cent, cells[nebr.nearest_cells[1]].cent);
+
+			const auto& cell1 = cells[min_element(nebr.ireg[MINUS]->cells.begin(), nebr.ireg[MINUS]->cells.end(), [&](const RegCellId& id1, const RegCellId& id2) 
+			{ 
+				if (id1.cell == cell.id || id1.cell == nebr.nebr.cell)
+					return false;
+				if (id2.cell == cell.id || id2.cell == nebr.nebr.cell)
+					return true;
+				else
+					return point::distance(nebr.cent, cells[id1.cell].cent) < point::distance(nebr.cent, cells[id2.cell].cent); 
+			})->cell];
+			const auto& cell2 = cells[min_element(nebr.ireg[PLUS]->cells.begin(), nebr.ireg[PLUS]->cells.end(), [&](const RegCellId& id1, const RegCellId& id2) 
+			{ 
+				if (id1.cell == cell.id || id1.cell == nebr.nebr.cell)
+					return false;
+				if (id2.cell == cell.id || id2.cell == nebr.nebr.cell)
+					return true;
+				else
+				return point::distance(nebr.cent, cells[id1.cell].cent) < point::distance(nebr.cent, cells[id2.cell].cent); })->cell];
+			
+			nebr.nearest_cells[2] = point::distance(nebr.cent, cell1.cent) < point::distance(nebr.cent, cell2.cent) ? cell1.id : cell2.id;
+			nebr.nearest_dists[2] = point::distance(nebr.cent, cells[nebr.nearest_cells[2]].cent);
+		}
 	}
 }
 void Mesh::set_geom_props()
@@ -372,11 +414,11 @@ void Mesh::calc_transmissibilities()
 
 				const auto& nu11 = nebr11.nu;	const auto& nu12 = nebr12.nu;
 				const auto& nu21 = nebr21.nu;	const auto& nu22 = nebr22.nu;
-				omega[i][0][0] = (nebr12.n.x * perm1.kx * nu12.x + nebr12.n.y * perm1.ky * nu12.y) / cell1.T[(int)(cell_id1.nebr[1]) - 2];
-				omega[i][0][1] = (nebr12.n.x * perm1.kx * nu11.x + nebr12.n.y * perm1.ky * nu11.y) / cell1.T[(int)(cell_id1.nebr[1]) - 2];
+				omega[i][0][0] = -(nebr12.n.x * perm1.kx * nu12.x + nebr12.n.y * perm1.ky * nu12.y) / cell1.T[(int)(cell_id1.nebr[1]) - 2];
+				omega[i][0][1] = -(nebr12.n.x * perm1.kx * nu11.x + nebr12.n.y * perm1.ky * nu11.y) / cell1.T[(int)(cell_id1.nebr[1]) - 2];
 
-				omega[i][1][0] = (nebr21.n.x * perm2.kx * nu22.x + nebr21.n.y * perm2.ky * nu22.y) / cell2.T[(int)(cell_id2.nebr[0]) - 2];
-				omega[i][1][1] = (nebr21.n.x * perm2.kx * nu21.x + nebr21.n.y * perm2.ky * nu21.y) / cell2.T[(int)(cell_id2.nebr[0]) - 2];
+				omega[i][1][0] = -(nebr21.n.x * perm2.kx * nu22.x + nebr21.n.y * perm2.ky * nu22.y) / cell2.T[(int)(cell_id2.nebr[0]) - 2];
+				omega[i][1][1] = -(nebr21.n.x * perm2.kx * nu21.x + nebr21.n.y * perm2.ky * nu21.y) / cell2.T[(int)(cell_id2.nebr[0]) - 2];
 			}
 
 			counter_a = counter_b = counter_c = counter_d = 0;

@@ -142,16 +142,6 @@ double Oil::getRate(const size_t cell_idx)
 
 void Oil::setTrans()
 {
-	/*for (int i = 0; i < mesh->inner_size; i++)
-	{
-		const auto& cell = mesh->cells[i];
-
-		for(int j = 0; j < cell.nebrs_num; j++)
-			if (cell.type == elem::HEX)
-			{
-
-			}
-	}*/
 	mesh->calc_transmissibilities();
 }
 

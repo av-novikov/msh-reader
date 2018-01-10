@@ -6,6 +6,9 @@
 #include <vector>
 #include <new>
 
+#include "adolc/drivers/drivers.h"
+#include "adolc/adolc.h"
+
 #define EQUALITY_TOLERANCE 1.E-9
 
 namespace point

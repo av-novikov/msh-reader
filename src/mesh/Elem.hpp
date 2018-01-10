@@ -10,6 +10,7 @@ namespace elem
 	static const int QUAD_VERT_SIZE = 4;
 	static const int TRI_VERT_SIZE = 3;
 	static const int MAX_INTERFACES_STENCIL = 6;
+	static const int NEARESET_POINT_NUMBER = 3;
 
 	enum EType { BORDER_TRI, BORDER_QUAD, FRAC_QUAD, PRISM, HEX, BORDER_HEX };
 	inline const char num_of_verts(const EType type)
@@ -43,6 +44,8 @@ namespace elem
 		point::Point cent;
 		point::Interaction* ireg [2];
 		point::Point n, nu;
+		int nearest_cells[NEARESET_POINT_NUMBER];
+		double nearest_dists[NEARESET_POINT_NUMBER];
 	};
 
 	class Element

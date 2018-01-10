@@ -42,6 +42,7 @@ namespace grid
 
 		void set_geom_props();
 		void count_types();
+		void set_nearest();
 		void setNebrId();
 		inline const char findNebrId(const Cell& cell_cur, const Cell& cell_nebr)
 		{
