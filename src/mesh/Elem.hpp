@@ -45,7 +45,7 @@ namespace elem
 		point::Interaction* ireg [2];
 		point::Point n, nu;
 		int nearest_cells[NEARESET_POINT_NUMBER];
-		double nearest_dists[NEARESET_POINT_NUMBER];
+		double nearest_coeff[NEARESET_POINT_NUMBER];
 	};
 
 	class Element

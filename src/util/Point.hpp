@@ -31,7 +31,6 @@ namespace point
 	{
 		std::vector<RegCellId> cells;
 		std::vector<std::vector<adouble>> trans;
-		std::vector<std::vector<double>> trans_doub;
 
 		Interaction() {};
 		Interaction(const std::vector<int>& _cells)

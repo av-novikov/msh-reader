@@ -72,10 +72,11 @@ void Mesh::set_nearest()
 			for (int j = 2; j < cell.nebrs_num; j++)
 			{
 				auto& nebr = cell.nebrs[j];
+
 				nebr.nearest_cells[0] = cell.id;
-				nebr.nearest_dists[0] = point::distance(nebr.cent, cells[nebr.nearest_cells[0]].cent);
+				assert(fabs(nebr.cent.z - cell.cent.z) < EQUALITY_TOLERANCE);
 				nebr.nearest_cells[1] = nebr.nebr.cell;
-				nebr.nearest_dists[1] = point::distance(nebr.cent, cells[nebr.nearest_cells[1]].cent);
+				assert(fabs(nebr.cent.z - cells[nebr.nebr.cell].cent.z) < EQUALITY_TOLERANCE);
 
 				const auto& cell1 = cells[min_element(nebr.ireg[MINUS]->cells.begin(), nebr.ireg[MINUS]->cells.end(), [&](const RegCellId& id1, const RegCellId& id2)
 				{
@@ -95,8 +96,17 @@ void Mesh::set_nearest()
 					else
 						return point::distance(nebr.cent, cells[id1.cell].cent) < point::distance(nebr.cent, cells[id2.cell].cent); })->cell];
 
-				nebr.nearest_cells[2] = point::distance(nebr.cent, cell1.cent) < point::distance(nebr.cent, cell2.cent) ? cell1.id : cell2.id;
-				nebr.nearest_dists[2] = point::distance(nebr.cent, cells[nebr.nearest_cells[2]].cent);
+				nebr.nearest_cells[2] = (point::distance(nebr.cent, cell1.cent) < point::distance(nebr.cent, cell2.cent) ? cell1.id : cell2.id);
+				assert(fabs(nebr.cent.z - cells[nebr.nearest_cells[2]].cent.z) < EQUALITY_TOLERANCE);
+
+				const Point& p0 = cells[nebr.nearest_cells[0]].cent;
+				const Point& p1 = cells[nebr.nearest_cells[1]].cent;
+				const Point& p2 = cells[nebr.nearest_cells[2]].cent;
+				const Point& p = nebr.cent;
+				double det = p0.x * (p1.y - p2.y) + p1.x * (p2.y - p0.y) + p2.x * (p0.y - p1.y);
+				nebr.nearest_coeff[0] = ( p.x * (p1.y - p2.y) + p.y * (p2.x - p1.x) + p1.x * p2.y - p2.x * p1.y ) / det;
+				nebr.nearest_coeff[1] = ( p.x * (p2.y - p0.y) + p.y * (p0.x - p2.x) + p2.x * p0.y - p0.x * p2.y ) / det;
+				nebr.nearest_coeff[2] = ( p.x * (p0.y - p1.y) + p.y * (p1.x - p0.x) + p0.x * p1.y - p1.x * p0.y ) / det;
 			}
 	}
 }
@@ -414,10 +424,6 @@ void Mesh::calc_transmissibilities()
 				reg.trans.resize(reg.cells.size());
 				for (auto& tr : reg.trans)
 					tr.resize(reg.cells.size());
-
-				reg.trans_doub.resize(reg.cells.size());
-				for (auto& tr : reg.trans_doub)
-					tr.resize(reg.cells.size());
 			}
 
 			vector<Interface> omega(reg.cells.size());
@@ -449,8 +455,8 @@ void Mesh::calc_transmissibilities()
 					buf_a[i][j] = buf_b[i][j] = buf_c[i][j] = buf_d[i][j] = 0.0;
 			for (int i = 0; i < reg.cells.size(); i++)
 			{
-				i_plus = (i + 1 ? i < reg.cells.size() - 1 : 0);
-				i_minus = (i - 1 ? i > 0 : reg.cells.size() - 1);
+				i_plus = (i < reg.cells.size() - 1 ? i + 1 : 0);
+				i_minus = (i > 0 ? i - 1 : reg.cells.size() - 1);
 				// A
 				buf_a[i][i_minus] =		omega[i][0][1];
 				buf_a[i][i] =			omega[i][0][0] - omega[i][1][1];
@@ -479,21 +485,10 @@ void Mesh::calc_transmissibilities()
 				abs_sum = sum = 0.0;
 				for (int j = 0; j < reg.cells.size(); j++)
 				{
-					buf = t[i][j];
+					reg.trans[i][j] = buf = t[i][j];
 					sum += buf.value();		abs_sum += fabs(buf.value());
 				}
-				/*for (int j = 0; j < reg.cells.size(); j++)
-				{
-					cond = t[i][j] / abs_sum < 10.0 * REL_TOL ? true : false;
-					condassign(t[i][j], cond, (adouble)0.0);
-				}*/
-				//assert(fabs(sum) / abs_sum < REL_TOL);
-
-				for (int j = 0; j < reg.cells.size(); j++)
-				{
-					reg.trans[i][j] = t[i][j];
-					reg.trans_doub[i][j] = t[i][j].value();
-				}
+				assert(fabs(sum) / abs_sum < REL_TOL);
 			}
 		}
 	}

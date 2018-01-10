@@ -33,6 +33,12 @@ namespace oil
 			return props_sk[0].kz;
 		};
 
+		inline adouble linearInterp(const Cell& cell, const int nebr_id, adouble f0, adouble f1, adouble f2)
+		{
+			const auto& nebr = cell.nebrs[nebr_id];
+			return f0 * nebr.nearest_coeff[0] + f1 * nebr.nearest_coeff[1] + f2 * nebr.nearest_coeff[2];
+		}
+
 		/*double getTrans(const Cell& cell1, const int idx, const Cell& cell2) const
 		{
 			const double k1 = getPerm(cell1);
