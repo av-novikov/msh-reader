@@ -133,13 +133,10 @@ inline Interpolate* setInvDataset(vector< pair<double,double> >& vec, const doub
 	return new Interpolate(x, y, N);
 };
 
-
-inline adouble** multiply(const adouble** a, const adouble** b, const int N)
+template <typename ValType>
+inline void multiply(ValType** a, ValType** b, ValType** c, const int N)
 {
-	adouble** c = new adouble*[N];
-	for (int i = 0; i < N; i++)
-		c[i] = new adouble[N];
-	adouble sum;
+	ValType sum;
 	for (int i = 0; i < N; i++)
 		for (int j = 0; j < N; j++)
 		{
@@ -148,9 +145,14 @@ inline adouble** multiply(const adouble** a, const adouble** b, const int N)
 				sum += a[i][k] * b[k][j];
 			c[i][j] = sum;
 		}
-	return c;
 };
-
+template <typename ValType>
+inline void matrix_add(ValType** a, ValType** b, const double beta, const int N)
+{
+	for (int i = 0; i < N; i++)
+		for (int j = 0; j < N; j++)
+			a[i][j] += beta * b[i][j];
+};
 template <typename ValType>
 class QR_Decomp
 {

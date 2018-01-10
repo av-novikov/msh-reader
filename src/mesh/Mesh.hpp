@@ -8,7 +8,8 @@
 #include <initializer_list>
 #include <functional>
 
-#include "paralution.hpp"
+#include "adolc/drivers/drivers.h"
+#include "adolc/adolc.h"
 
 namespace mshreader
 {
@@ -22,6 +23,8 @@ namespace snapshotter
 namespace grid
 {
 	static const int stencil = -11;
+	const int MAX_REG_CELLS = 30;
+	const double REL_TOL = 1.E-10;
 
 	class Mesh
 	{
@@ -53,6 +56,7 @@ namespace grid
 		};
 		void set_interaction_regions();
 
+		adouble **buf_a, **buf_b, **buf_c, **buf_d, **inv_a, **t, **mult;
 	public:
 		double Volume;
 

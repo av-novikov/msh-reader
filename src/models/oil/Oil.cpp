@@ -1,9 +1,6 @@
 #include "src/models/oil/Oil.hpp"
 #include "src/util/utils.h"
 
-#include "adolc/drivers/drivers.h"
-#include "adolc/adolc.h"
-
 using namespace oil;
 using namespace std;
 

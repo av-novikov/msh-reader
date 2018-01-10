@@ -6,16 +6,35 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#include "src/util/utils.h"
+
 using namespace grid;
 using namespace point;
 using namespace std;
-using namespace paralution;
 
 Mesh::Mesh()
 {
+	buf_a = new adouble*[MAX_REG_CELLS];
+	buf_b = new adouble*[MAX_REG_CELLS];
+	buf_c = new adouble*[MAX_REG_CELLS];
+	buf_d = new adouble*[MAX_REG_CELLS];
+	t =		new adouble*[MAX_REG_CELLS];
+	mult =  new adouble*[MAX_REG_CELLS];
+	for (int i = 0; i < MAX_REG_CELLS; i++)
+	{
+		buf_a[i] = new adouble[MAX_REG_CELLS];
+		buf_b[i] = new adouble[MAX_REG_CELLS];
+		buf_c[i] = new adouble[MAX_REG_CELLS];
+		buf_d[i] = new adouble[MAX_REG_CELLS];
+		t[i] = new adouble[MAX_REG_CELLS];
+		mult[i] = new adouble[MAX_REG_CELLS];
+	}
 }
 Mesh::~Mesh()
 {
+	for (int i = 0; i < MAX_REG_CELLS; i++)
+		delete[] buf_a[i], buf_b[i], buf_c[i], buf_d[i], t[i], mult[i];
+	delete[] buf_a, buf_b, buf_c, buf_d, t, mult;
 }
 void Mesh::process_geometry()
 {
@@ -48,37 +67,37 @@ void Mesh::set_nearest()
 	for (int i = 0; i < inner_size; i++)
 	{
 		auto& cell = cells[i];
-		assert(cell.type == elem::HEX || cell.type == elem::PRISM);
 		
-		for (int j = 2; j < cell.nebrs_num; j++)
-		{
-			auto& nebr = cell.nebrs[j];
-			nebr.nearest_cells[0] = cell.id;
-			nebr.nearest_dists[0] = point::distance(nebr.cent, cells[nebr.nearest_cells[0]].cent);
-			nebr.nearest_cells[1] = nebr.nebr.cell;
-			nebr.nearest_dists[1] = point::distance(nebr.cent, cells[nebr.nearest_cells[1]].cent);
+		if (cell.type == elem::HEX || cell.type == elem::PRISM)
+			for (int j = 2; j < cell.nebrs_num; j++)
+			{
+				auto& nebr = cell.nebrs[j];
+				nebr.nearest_cells[0] = cell.id;
+				nebr.nearest_dists[0] = point::distance(nebr.cent, cells[nebr.nearest_cells[0]].cent);
+				nebr.nearest_cells[1] = nebr.nebr.cell;
+				nebr.nearest_dists[1] = point::distance(nebr.cent, cells[nebr.nearest_cells[1]].cent);
 
-			const auto& cell1 = cells[min_element(nebr.ireg[MINUS]->cells.begin(), nebr.ireg[MINUS]->cells.end(), [&](const RegCellId& id1, const RegCellId& id2) 
-			{ 
-				if (id1.cell == cell.id || id1.cell == nebr.nebr.cell)
-					return false;
-				if (id2.cell == cell.id || id2.cell == nebr.nebr.cell)
-					return true;
-				else
-					return point::distance(nebr.cent, cells[id1.cell].cent) < point::distance(nebr.cent, cells[id2.cell].cent); 
-			})->cell];
-			const auto& cell2 = cells[min_element(nebr.ireg[PLUS]->cells.begin(), nebr.ireg[PLUS]->cells.end(), [&](const RegCellId& id1, const RegCellId& id2) 
-			{ 
-				if (id1.cell == cell.id || id1.cell == nebr.nebr.cell)
-					return false;
-				if (id2.cell == cell.id || id2.cell == nebr.nebr.cell)
-					return true;
-				else
-				return point::distance(nebr.cent, cells[id1.cell].cent) < point::distance(nebr.cent, cells[id2.cell].cent); })->cell];
-			
-			nebr.nearest_cells[2] = point::distance(nebr.cent, cell1.cent) < point::distance(nebr.cent, cell2.cent) ? cell1.id : cell2.id;
-			nebr.nearest_dists[2] = point::distance(nebr.cent, cells[nebr.nearest_cells[2]].cent);
-		}
+				const auto& cell1 = cells[min_element(nebr.ireg[MINUS]->cells.begin(), nebr.ireg[MINUS]->cells.end(), [&](const RegCellId& id1, const RegCellId& id2)
+				{
+					if (id1.cell == cell.id || id1.cell == nebr.nebr.cell)
+						return false;
+					if (id2.cell == cell.id || id2.cell == nebr.nebr.cell)
+						return true;
+					else
+						return point::distance(nebr.cent, cells[id1.cell].cent) < point::distance(nebr.cent, cells[id2.cell].cent);
+				})->cell];
+				const auto& cell2 = cells[min_element(nebr.ireg[PLUS]->cells.begin(), nebr.ireg[PLUS]->cells.end(), [&](const RegCellId& id1, const RegCellId& id2)
+				{
+					if (id1.cell == cell.id || id1.cell == nebr.nebr.cell)
+						return false;
+					if (id2.cell == cell.id || id2.cell == nebr.nebr.cell)
+						return true;
+					else
+						return point::distance(nebr.cent, cells[id1.cell].cent) < point::distance(nebr.cent, cells[id2.cell].cent); })->cell];
+
+				nebr.nearest_cells[2] = point::distance(nebr.cent, cell1.cent) < point::distance(nebr.cent, cell2.cent) ? cell1.id : cell2.id;
+				nebr.nearest_dists[2] = point::distance(nebr.cent, cells[nebr.nearest_cells[2]].cent);
+			}
 	}
 }
 void Mesh::set_geom_props()
@@ -374,18 +393,15 @@ void Mesh::set_interaction_regions()
 }
 void Mesh::calc_transmissibilities()
 {
-	typedef array<array<double, 2>, 2> Interface;
+	typedef array<array<adouble, 2>, 2> Interface;
 	
-
-	double sum, abs_sum, buf;
-	int ind_col;
-	LocalMatrix<double> a, b, c, d, tmp, t;
-	const int MAX_REG_CELLS = 30;
-	const double REL_TOL = 1.E-10;
-	double buf_a [MAX_REG_CELLS * MAX_REG_CELLS], buf_b[MAX_REG_CELLS * MAX_REG_CELLS], buf_c[MAX_REG_CELLS * MAX_REG_CELLS], buf_d[MAX_REG_CELLS * MAX_REG_CELLS];
+	double sum, abs_sum;
+	adouble buf, cond;
+	//LocalMatrix<double> a, b, c, d, tmp, t;
+	/*double buf_a [MAX_REG_CELLS * MAX_REG_CELLS], buf_b[MAX_REG_CELLS * MAX_REG_CELLS], buf_c[MAX_REG_CELLS * MAX_REG_CELLS], buf_d[MAX_REG_CELLS * MAX_REG_CELLS];
 	int ind_ai [3 * MAX_REG_CELLS], ind_aj [3 * MAX_REG_CELLS], ind_bi[3 * MAX_REG_CELLS], ind_bj[3 * MAX_REG_CELLS], 
-			ind_ci[3 * MAX_REG_CELLS], ind_cj[3 * MAX_REG_CELLS], ind_di[3 * MAX_REG_CELLS], ind_dj[3 * MAX_REG_CELLS];
-	int counter_a, counter_b, counter_c, counter_d, i_plus, i_minus;
+			ind_ci[3 * MAX_REG_CELLS], ind_cj[3 * MAX_REG_CELLS], ind_di[3 * MAX_REG_CELLS], ind_dj[3 * MAX_REG_CELLS];*/
+	int i_plus, i_minus;
 
 	for (auto& pt : pts)
 	{
@@ -393,9 +409,16 @@ void Mesh::calc_transmissibilities()
 		{
 			auto& reg = *pt.int_reg;
 
-			reg.row_offset.resize(reg.cells.size() + 1);
-			reg.colms.resize(reg.cells.size() * reg.cells.size());
-			reg.trans.resize(reg.cells.size() * reg.cells.size());
+			if (reg.trans.size() == 0)
+			{
+				reg.trans.resize(reg.cells.size());
+				for (auto& tr : reg.trans)
+					tr.resize(reg.cells.size());
+
+				reg.trans_doub.resize(reg.cells.size());
+				for (auto& tr : reg.trans_doub)
+					tr.resize(reg.cells.size());
+			}
 
 			vector<Interface> omega(reg.cells.size());
 			for(int i = 0; i < reg.cells.size(); i++)
@@ -421,55 +444,56 @@ void Mesh::calc_transmissibilities()
 				omega[i][1][1] = -(nebr21.n.x * perm2.kx * nu21.x + nebr21.n.y * perm2.ky * nu21.y) / cell2.T[(int)(cell_id2.nebr[0]) - 2];
 			}
 
-			counter_a = counter_b = counter_c = counter_d = 0;
+			for (int i = 0; i < reg.cells.size(); i++)
+				for (int j = 0; j < reg.cells.size(); j++)
+					buf_a[i][j] = buf_b[i][j] = buf_c[i][j] = buf_d[i][j] = 0.0;
 			for (int i = 0; i < reg.cells.size(); i++)
 			{
 				i_plus = (i + 1 ? i < reg.cells.size() - 1 : 0);
 				i_minus = (i - 1 ? i > 0 : reg.cells.size() - 1);
 				// A
-				ind_ai[counter_a] = i;	ind_aj[counter_a] = i_minus;	buf_a[counter_a++] = omega[i][0][1];
-				ind_ai[counter_a] = i;	ind_aj[counter_a] = i;			buf_a[counter_a++] = omega[i][0][0] - omega[i][1][1];
-				ind_ai[counter_a] = i;	ind_aj[counter_a] = i_plus;		buf_a[counter_a++] = -omega[i][1][0];
+				buf_a[i][i_minus] =		omega[i][0][1];
+				buf_a[i][i] =			omega[i][0][0] - omega[i][1][1];
+				buf_a[i][i_plus] =		-omega[i][1][0];
 				// B
-				ind_bi[counter_b] = i;	ind_bj[counter_b] = i;			buf_b[counter_b++] = omega[i][0][0] + omega[i][0][1];
-				ind_bi[counter_b] = i;	ind_bj[counter_b] = i_plus;		buf_b[counter_b++] = -omega[i][1][0] - omega[i][1][1];
+				buf_b[i][i] =			omega[i][0][0] + omega[i][0][1];
+				buf_b[i][i_plus] =		-omega[i][1][0] - omega[i][1][1];
 				// C
-				ind_ci[counter_c] = i;	ind_cj[counter_c] = i;			buf_c[counter_c++] = omega[i][0][0];
-				ind_ci[counter_c] = i;	ind_cj[counter_c] = i_minus;	buf_c[counter_c++] = omega[i][0][1];
+				buf_c[i][i] =			omega[i][0][0];
+				buf_c[i][i_minus] =		omega[i][0][1];
 				// D
-				ind_di[counter_d] = i;	ind_dj[counter_d] = i;			buf_d[counter_d++] = omega[i][0][0] + omega[i][0][1];
+				buf_d[i][i] =			omega[i][0][0] + omega[i][0][1];
 			}
-			a.Assemble(ind_ai, ind_aj, buf_a, counter_a, "A", reg.cells.size(), reg.cells.size());
-			b.Assemble(ind_bi, ind_bj, buf_b, counter_b, "B", reg.cells.size(), reg.cells.size());
-			c.Assemble(ind_ci, ind_cj, buf_c, counter_c, "C", reg.cells.size(), reg.cells.size());
-			d.Assemble(ind_di, ind_dj, buf_d, counter_d, "D", reg.cells.size(), reg.cells.size());
-
-			a.Invert();
-			tmp.MatrixMult(c , a);
-			t.MatrixMult(tmp, b);
-			t.MatrixAdd(d, 1.0, -1.0, true);
-			t.CopyToCSR(reg.row_offset.data(), reg.colms.data(), reg.trans.data());
-			a.Clear();	b.Clear();	c.Clear();	d.Clear();	tmp.Clear();	t.Clear();
+			QR_Decomp<adouble> qr;
+			inv_a = qr.Invert(buf_a, reg.cells.size());
+			multiply<adouble>(buf_c, inv_a, mult, reg.cells.size());
+			for (int i = 0; i < reg.cells.size(); i++)
+				delete[] inv_a[i];
+			delete[] inv_a;
+			multiply<adouble>(mult, buf_b, t, reg.cells.size());
+			matrix_add<adouble>(t, buf_d, -1.0, reg.cells.size());
 
 			// Sum == 0
 			for (int i = 0; i < reg.cells.size(); i++)
 			{
-				abs_sum = sum = 0.0;	ind_col = 0;
-				while (ind_col + reg.row_offset[i] < reg.row_offset[i + 1])
+				abs_sum = sum = 0.0;
+				for (int j = 0; j < reg.cells.size(); j++)
 				{
-					buf = reg.trans[ind_col + reg.row_offset[i]];
-					sum += buf;		abs_sum += fabs(buf);
-					ind_col++;
+					buf = t[i][j];
+					sum += buf.value();		abs_sum += fabs(buf.value());
 				}
-				ind_col = 0;
-				while (ind_col + reg.row_offset[i] < reg.row_offset[i + 1])
+				/*for (int j = 0; j < reg.cells.size(); j++)
 				{
-					buf = reg.trans[ind_col + reg.row_offset[i]];
-					if (fabs(reg.trans[ind_col + reg.row_offset[i]]) / abs_sum < 10.0 * REL_TOL)
-						reg.trans[ind_col + reg.row_offset[i]] = 0.0;
-					ind_col++;
+					cond = t[i][j] / abs_sum < 10.0 * REL_TOL ? true : false;
+					condassign(t[i][j], cond, (adouble)0.0);
+				}*/
+				//assert(fabs(sum) / abs_sum < REL_TOL);
+
+				for (int j = 0; j < reg.cells.size(); j++)
+				{
+					reg.trans[i][j] = t[i][j];
+					reg.trans_doub[i][j] = t[i][j].value();
 				}
-				assert(fabs(sum) / abs_sum < REL_TOL);
 			}
 		}
 	}
