@@ -17,6 +17,7 @@
 #include "src/util/VTKSnapshotter.hpp"
 
 #include "src/models/oil/Oil.hpp"
+#include "src/util/utils.h"
 
 using namespace std;
 using namespace snapshotter;
@@ -69,6 +70,8 @@ void VTKSnapshotter<modelType>::dump(const int i)
 	auto cells = vtkSmartPointer<vtkCellArray>::New();
 	auto type = vtkSmartPointer<vtkIntArray>::New();
 	type->SetName("type");
+	auto pres = vtkSmartPointer<vtkDoubleArray>::New();
+	pres->SetName("pressure");
 
 	points->Allocate(mesh->pts.size());
 	cells->Allocate(mesh->inner_size/*mesh->cells.size()*/);
@@ -93,7 +96,8 @@ void VTKSnapshotter<modelType>::dump(const int i)
 				vtkCell->GetPointIds()->SetId(j, el.verts[j]);
 			cells->InsertNextCell(vtkCell);
 		}
-
+		const auto& var = (*model)[i].u_next;
+		pres->InsertNextValue(var.p * model->P_dim / BAR_TO_PA);
 		type->InsertNextValue(el.type);
 	}
 
@@ -101,6 +105,7 @@ void VTKSnapshotter<modelType>::dump(const int i)
 	grid->SetCells(types, cells);
 	vtkCellData* fd = grid->GetCellData();
 	fd->AddArray(type);
+	fd->AddArray(pres);
 
 	// Writing
 	auto writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();

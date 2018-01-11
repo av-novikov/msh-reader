@@ -127,7 +127,7 @@ void OilSolver::solveStep()
 		computeJac();
 		fill();
 		solver.Assemble(ind_i, ind_j, a, elemNum, ind_rhs, rhs);
- 		solver.Solve(PRECOND::ILU_SIMPLE);
+ 		solver.Solve(PRECOND::ILU_SERIOUS);
 		copySolution(solver.getSolution());
 
 		//if (repeat == 0)
@@ -166,11 +166,11 @@ void OilSolver::computeJac()
 		condassign(model->h[i], isBorderCell, model->solveBorder(cell));
 		condassign(model->h[i], isInnerCell, model->solveInner(cell));*/
 		if (cell.type == elem::FRAC_HEX)
-			model->h[i] = model->solveFrac(cell);
+			model->h[i] = cell.V * model->solveFrac(cell);
 		else if (cell.type == elem::BORDER_HEX)
 			model->h[i] = model->solveBorder(cell);
 		else if (cell.type == elem::HEX || cell.type == elem::PRISM)
-			model->h[i] = model->solveInner(cell);
+			model->h[i] = cell.V * model->solveInner(cell);
 	}
 
 	for (int i = 0; i < Model::var_size * size; i++)
@@ -184,8 +184,9 @@ void OilSolver::fill()
 		&model->u_next[0], &elemNum, (unsigned int**)(&ind_i), (unsigned int**)(&ind_j), &a, options);
 
 	int counter = 0;
-	for (const auto& cell : mesh->cells)
+	for (int j = 0; j < mesh->inner_size; j++)
 	{
+		const auto& cell = mesh->cells[j];
 		//getMatrixStencil(cell);
 		for (int i = 0; i < Model::var_size; i++)
 		{

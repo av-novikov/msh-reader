@@ -22,7 +22,7 @@ oil::Properties* getProps()
 	props->ht_max = 100000.0;
 
 	props->perfIntervals.push_back(make_pair(0, 0));
-	props->R_dim = 10.0;
+	props->R_dim = 1.0;
 	props->r_w = 10;
 	props->r_e = 1000.0;
 
@@ -30,7 +30,7 @@ oil::Properties* getProps()
 	tmp.m = 0.1;
 	tmp.p_init = tmp.p_out = 200.0 * 100000.0;
 	tmp.height = 10.0;
-	tmp.kx = tmp.ky = 10.0;
+	tmp.kx = tmp.ky = tmp.kz = 10.0;
 	tmp.dens_stc = 2000.0;
 	tmp.beta = 0.0 * 1.0e-10;
 	props->props_sk.push_back(tmp);
