@@ -14,7 +14,7 @@ namespace elem
 
 	static const int EMPTY_PLACE = 59;
 
-	enum EType { BORDER_TRI, BORDER_QUAD, FRAC_QUAD, PRISM, HEX, BORDER_HEX };
+	enum EType { BORDER_TRI, BORDER_QUAD, FRAC_QUAD, PRISM, HEX, BORDER_HEX, FRAC_HEX };
 	inline const char num_of_verts(const EType type)
 	{
 		if (type == BORDER_TRI)

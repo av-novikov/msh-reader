@@ -32,7 +32,7 @@ VTKSnapshotter<modelType>::VTKSnapshotter(const Model* _model) : model(_model), 
 	for (int i = 0; i < mesh->inner_size; i++)
 	{
 		const auto& el = mesh->cells[i];
-		if (el.type == elem::HEX || el.type == elem::BORDER_HEX)
+		if (el.type == elem::HEX || el.type == elem::BORDER_HEX || el.type == elem::FRAC_HEX)
 			types[i] = VTK_HEXAHEDRON;
 		else if (el.type == elem::PRISM)
 			types[i] = VTK_WEDGE;
@@ -71,7 +71,7 @@ void VTKSnapshotter<modelType>::dump(const int i)
 	type->SetName("type");
 
 	points->Allocate(mesh->pts.size());
-	cells->Allocate(mesh->cells.size());
+	cells->Allocate(mesh->inner_size/*mesh->cells.size()*/);
 
 	for (const auto& pt : mesh->pts)
 		points->InsertNextPoint(pt.x * R_dim, pt.y * R_dim, pt.z * R_dim);
@@ -79,7 +79,7 @@ void VTKSnapshotter<modelType>::dump(const int i)
 	for (int i = 0; i < mesh->inner_size; i++)
 	{
 		const auto& el = mesh->cells[i];
-		if (el.type == elem::HEX || el.type == elem::BORDER_HEX)
+		if (el.type == elem::HEX || el.type == elem::BORDER_HEX || el.type == elem::FRAC_HEX)
 		{
 			auto vtkCell = vtkSmartPointer<vtkHexahedron>::New();
 			for (int j = 0; j < el.verts_num; j++)

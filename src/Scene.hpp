@@ -32,7 +32,7 @@ public:
 	}
 	void start()
 	{
-		//method->start();
+		method->start();
 	}
 };
 

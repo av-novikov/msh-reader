@@ -1,6 +1,8 @@
 #include "src/models/oil/Oil.hpp"
 #include "src/util/utils.h"
 
+#define ADOLC_ADVANCED_BRANCHING
+
 using namespace oil;
 using namespace std;
 using namespace point;
@@ -154,16 +156,24 @@ adouble Oil::solveInner(const Cell& cell)
 
 	// Bottom
 	const auto& nebr_bot = cell.nebrs[0];
-	H += ht / cell.V * getVertTrans(cell, 0, mesh->cells[nebr_bot.nebr.cell], nebr_bot.nebr.nebr) *
-		linearInterp(nebr_bot,	props_oil.getDensity(x[nebr_bot.nearest_cells[0]].p) / props_oil.getViscosity(x[nebr_bot.nearest_cells[0]].p),
-								props_oil.getDensity(x[nebr_bot.nearest_cells[1]].p) / props_oil.getViscosity(x[nebr_bot.nearest_cells[1]].p),
-								props_oil.getDensity(x[nebr_bot.nearest_cells[2]].p) / props_oil.getViscosity(x[nebr_bot.nearest_cells[2]].p)) * (cur.p - x[nebr_bot.nebr.cell].p);
+	const auto& beta_bot = mesh->cells[nebr_bot.nebr.cell];
+	adouble isInner_bot = (beta_bot.type != elem::BORDER_QUAD && beta_bot.type != elem::BORDER_TRI) ? true : false;
+	const auto& anebr_bot = x[beta_bot.id];
+	tmp = 0.0;
+	condassign(tmp, isInner_bot, ht / cell.V * getVertTrans(cell, 0, beta_bot, nebr_bot.nebr.nebr) *
+					linearInterp1d(props_oil.getDensity(cur.p) / props_oil.getViscosity(cur.p), nebr_bot.L,
+						props_oil.getDensity(anebr_bot.p) / props_oil.getViscosity(anebr_bot.p), beta_bot.nebrs[nebr_bot.nebr.nebr].L) * (cur.p - anebr_bot.p));
+	H += tmp;
 	// Top
 	const auto& nebr_top = cell.nebrs[1];
-	H += ht / cell.V * getVertTrans(cell, 1, mesh->cells[nebr_top.nebr.cell], nebr_top.nebr.nebr) *
-		linearInterp(nebr_top,	props_oil.getDensity(x[nebr_top.nearest_cells[0]].p) / props_oil.getViscosity(x[nebr_top.nearest_cells[0]].p),
-								props_oil.getDensity(x[nebr_top.nearest_cells[1]].p) / props_oil.getViscosity(x[nebr_top.nearest_cells[1]].p),
-								props_oil.getDensity(x[nebr_top.nearest_cells[2]].p) / props_oil.getViscosity(x[nebr_top.nearest_cells[2]].p)) * (cur.p - x[nebr_top.nebr.cell].p);
+	const auto& beta_top = mesh->cells[nebr_top.nebr.cell];
+	adouble isInner_top = (beta_top.type != elem::BORDER_QUAD && beta_top.type != elem::BORDER_TRI) ? true : false;
+	const auto& anebr_top = x[beta_top.id];
+	tmp = 0.0;
+	condassign(tmp, isInner_top, ht / cell.V * getVertTrans(cell, 1, beta_top, nebr_top.nebr.nebr) *
+					linearInterp1d(props_oil.getDensity(cur.p) / props_oil.getViscosity(cur.p), nebr_top.L,
+						props_oil.getDensity(anebr_top.p) / props_oil.getViscosity(anebr_top.p), beta_top.nebrs[nebr_top.nebr.nebr].L) * (cur.p - anebr_top.p));
+	H += tmp;
 	// Laterals
 	for (int i = 2; i < cell.nebrs_num; i++)
 	{
@@ -193,22 +203,6 @@ adouble Oil::solveBorder(const Cell& cell)
 }
 adouble Oil::solveFrac(const Cell& cell)
 {
-	const auto& cur = x[cell.id];
-	const auto prev = (*this)[cell.id].u_prev;
-
-	adouble H = props_sk[0].getPoro(cur.p) * props_oil.getDensity(cur.p) - props_sk[0].getPoro(prev.p) * props_oil.getDensity(prev.p);
-	/*for (int i = 0; i < mesh->wellNebrs.size(); i++)
-	{
-		const auto& nebr_str = mesh->wellNebrs[i];
-		const int nebr_idx = nebr_str.id;
-		const auto& beta = mesh->cells[nebr_idx];
-		const auto& nebr = x[nebr_idx];
-
-		H += ht / mesh->well_vol * getTrans(cell, i, beta) *
-			linearAppr(props_oil.getDensity(cur.p) / props_oil.getViscosity(cur.p), nebr_str.dist,
-				props_oil.getDensity(nebr.p) / props_oil.getViscosity(nebr.p), getDistance(beta, cell)) *
-				(cur.p - nebr.p);
-	}*/
-
-	return H;
+	assert(cell.type == elem::FRAC_HEX);
+	return x[cell.id].p - Pwf;
 }

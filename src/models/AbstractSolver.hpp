@@ -55,40 +55,29 @@ protected:
 	std::vector<int> stencil_idx;
 	inline void getMatrixStencil(const Cell& cell)
 	{
-		/*if (cell.type == elem::BORDER_TRI || cell.type == elem::BORDER_QUAD)
+		if (cell.type == elem::BORDER_HEX || cell.type == elem::FRAC_HEX)
 		{
-			stencil_idx.resize(2);
+			stencil_idx.resize(1);
 			stencil_idx[0] = cell.id;
-			stencil_idx[1] = cell.nebrs[0].id;
 		}
-		else if (cell.type == elem::FRAC_QUAD)
+		else
 		{
-			stencil_idx.resize(3);
+			std::vector<int> tmp;
+			for (int i = 2; i < cell.nebrs_num; i++)
+				for (const auto& id : cell.nebrs[i].ireg[point::PLUS]->cells)
+					tmp.push_back(id.cell);
+			sort(tmp.begin(), tmp.end());
+			tmp.erase(std::unique(tmp.begin(), tmp.end()), tmp.end());
+
+			stencil_idx.resize(2 + tmp.size());
 			stencil_idx[0] = cell.id;
-			stencil_idx[1] = cell.nebrs[0].id;
-			stencil_idx[2] = cell.nebrs[1].id;
+			stencil_idx[1] = cell.nebrs[0].nebr.cell;
+			stencil_idx[2] = cell.nebrs[1].nebr.cell;
+			int counter = 3;
+			for (int i = 0; i < tmp.size(); i++)
+				if (tmp[i] != cell.id)
+					stencil_idx[counter++] = tmp[i];
 		}
-		else if (cell.type == elem::PRISM)
-		{
-			stencil_idx.resize(6);
-			stencil_idx[0] = cell.id;
-			stencil_idx[1] = cell.nebrs[0].id;
-			stencil_idx[2] = cell.nebrs[1].id;
-			stencil_idx[3] = cell.nebrs[2].id;
-			stencil_idx[4] = cell.nebrs[3].id;
-			stencil_idx[5] = cell.nebrs[4].id;
-		}
-		else if (cell.type == elem::HEX)
-		{
-			stencil_idx.resize(6);
-			stencil_idx[0] = cell.id;
-			stencil_idx[1] = cell.nebrs[0].id;
-			stencil_idx[2] = cell.nebrs[1].id;
-			stencil_idx[3] = cell.nebrs[2].id;
-			stencil_idx[4] = cell.nebrs[3].id;
-			stencil_idx[5] = cell.nebrs[4].id;
-			stencil_idx[6] = cell.nebrs[5].id;
-		}*/
 	};
 
 	int* ind_i;
@@ -111,8 +100,9 @@ public:
 	{
 		int counter = 0;
 
-		/*for (const auto& cell : mesh->cells)
+		for (int i = 0; i < model->varNum; i++)
 		{
+			const auto& cell = mesh->cells[i];
 			getMatrixStencil(cell);
 			for (size_t i = 0; i < var_size; i++)
 				for (const int idx : stencil_idx)
@@ -123,9 +113,10 @@ public:
 			stencil_idx.clear();
 		}
 
-		elemNum = counter;*/
-		/*for (int i = 0; i < var_size * model->cellsNum; i++)
-			ind_rhs[i] = i;*/
+		elemNum = counter;
+		
+		for (int i = 0; i < var_size * model->cellsNum; i++)
+			ind_rhs[i] = i;
 	}
 	virtual void start();
 };

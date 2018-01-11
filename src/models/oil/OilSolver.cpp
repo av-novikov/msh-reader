@@ -159,20 +159,19 @@ void OilSolver::computeJac()
 	for (int i = 0; i < mesh->inner_size; i++)
 	{
 		const auto& cell = mesh->cells[i];
-		adouble isWellCell = false;// (cell.type == CellType::WELL) ? true : false;
-		condassign(model->h[i], isWellCell, (adouble)model->P_dim, cell.V * model->solveInner(cell));
+		/*adouble isFracCell = (cell.type == elem::FRAC_HEX) ? true : false;
+		adouble isBorderCell = (cell.type == elem::BORDER_HEX) ? true : false;
+		adouble isInnerCell = (cell.type == elem::HEX || cell.type == elem::PRISM) ? true : false;
+		condassign(model->h[i], isFracCell, model->solveFrac(cell));
+		condassign(model->h[i], isBorderCell, model->solveBorder(cell));
+		condassign(model->h[i], isInnerCell, model->solveInner(cell));*/
+		if (cell.type == elem::FRAC_HEX)
+			model->h[i] = model->solveFrac(cell);
+		else if (cell.type == elem::BORDER_HEX)
+			model->h[i] = model->solveBorder(cell);
+		else if (cell.type == elem::HEX || cell.type == elem::PRISM)
+			model->h[i] = model->solveInner(cell);
 	}
-	/*for (int i = mesh->border_beg; i < model->cellsNum - 1; i++)
-	{
-		const auto& cell = mesh->cells[i];
-		model->h[i] = model->solveBorder(cell);
-	}
-	
-	adouble leftIsRate = model->leftBoundIsRate;
-	adouble tmp = model->solveWell(mesh->cells[well_idx]);
-	condassign(model->h[well_idx], leftIsRate,
-		tmp + model->ht * model->props_oil.getDensity(model->x[well_idx].p) * model->Q_sum,
-		(model->x[well_idx].p - model->Pwf) / model->P_dim);*/
 
 	for (int i = 0; i < Model::var_size * size; i++)
 		model->h[i] >>= y[i];

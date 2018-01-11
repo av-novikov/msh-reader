@@ -22,7 +22,7 @@ namespace snapshotter
 
 namespace grid
 {
-	static const int stencil = 11;
+	static const int stencil = 12;
 	const int MAX_REG_CELLS = 30;
 	const double REL_TOL = 1.E-10;
 
@@ -43,6 +43,7 @@ namespace grid
 	protected:
 		double z_max;
 
+		void setFrac();
 		void set_geom_props();
 		void count_types();
 		void set_nearest();
@@ -65,7 +66,7 @@ namespace grid
 
 		void process_geometry();
 
-		size_t getCellsSize() const;
+		size_t getCalcCellsSize() const;
 		inline Cell& getCell(const int i) {	return cells[i]; };
 		inline const Cell& getCell(const int i) const { return cells[i]; };
 		void calc_transmissibilities();

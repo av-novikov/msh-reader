@@ -36,6 +36,19 @@ Mesh::~Mesh()
 		delete[] buf_a[i], buf_b[i], buf_c[i], buf_d[i], t[i], mult[i];
 	delete[] buf_a, buf_b, buf_c, buf_d, t, mult;
 }
+void Mesh::setFrac()
+{
+	for (int i = 0; i < inner_size; i++)
+	{
+		Cell& cell = cells[i];
+		for (int j = 2; j < cell.nebrs_num; j++)
+		{
+			const auto& nebr = cell.nebrs[j];
+			if (cells[nebr.nebr.cell].type == elem::FRAC_QUAD)
+				cell.type = elem::FRAC_HEX;
+		}
+	}
+}
 void Mesh::process_geometry()
 {
 	setNebrId();
@@ -44,6 +57,7 @@ void Mesh::process_geometry()
 
 	set_interaction_regions(); 
 	set_nearest();
+	setFrac();
 }
 void Mesh::count_types()
 {
@@ -185,7 +199,6 @@ void Mesh::set_geom_props()
 			el.nebrs[2].L = distance(el.cent, el.nebrs[2].cent);
 			el.nebrs[2].n = vector_product(pts[el.verts[1]] - pts[el.verts[0]], pts[el.verts[3]] - pts[el.verts[0]]) / 2.0;
 			el.nebrs[2].nu = { (el.nebrs[2].cent - el.cent).y, -(el.nebrs[2].cent - el.cent).x, 0.0 };
-
 
 			el.nebrs[3].S = square(pts[el.verts[1]], pts[el.verts[2]], pts[el.verts[5]], pts[el.verts[4]]);
 			el.nebrs[3].cent = (pts[el.verts[1]] + pts[el.verts[2]] + pts[el.verts[5]] + pts[el.verts[4]]) / 4.0;
@@ -439,10 +452,6 @@ void Mesh::calc_transmissibilities()
 	
 	double sum, abs_sum;
 	adouble buf, cond;
-	//LocalMatrix<double> a, b, c, d, tmp, t;
-	/*double buf_a [MAX_REG_CELLS * MAX_REG_CELLS], buf_b[MAX_REG_CELLS * MAX_REG_CELLS], buf_c[MAX_REG_CELLS * MAX_REG_CELLS], buf_d[MAX_REG_CELLS * MAX_REG_CELLS];
-	int ind_ai [3 * MAX_REG_CELLS], ind_aj [3 * MAX_REG_CELLS], ind_bi[3 * MAX_REG_CELLS], ind_bj[3 * MAX_REG_CELLS], 
-			ind_ci[3 * MAX_REG_CELLS], ind_cj[3 * MAX_REG_CELLS], ind_di[3 * MAX_REG_CELLS], ind_dj[3 * MAX_REG_CELLS];*/
 	int i_plus, i_minus;
 
 	for (auto& pt : pts)
@@ -525,9 +534,9 @@ void Mesh::calc_transmissibilities()
 		}
 	}
 }
-size_t Mesh::getCellsSize() const
+size_t Mesh::getCalcCellsSize() const
 {
-	return cells.size();
+	return inner_size;
 }
 void Mesh::setNebrId()
 {

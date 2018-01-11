@@ -74,13 +74,17 @@ protected:
 		mesh = std::make_shared<grid::Mesh>(*reader.read(nebrFileName, R_dim));
 		mesh->process_geometry();
 
-		cellsNum = mesh.get()->getCellsSize();
+		cellsNum = mesh.get()->getCalcCellsSize();
 		varNum = VarContainer::size * cellsNum;
 		u_prev.resize(varNum);
 		u_iter.resize(varNum);
 		u_next.resize(varNum);
 		Volume = mesh->Volume;
 	}
+	adouble linearInterp1d(const adouble a1, const double r1, const adouble a2, const double r2)
+	{
+		return (a1 * r2 + a2 * r1) / (r1 + r2);
+	};
 	virtual void setProps(const propsType& props) = 0;
 	virtual void makeDimLess() = 0;
 	virtual void setPerforated()
